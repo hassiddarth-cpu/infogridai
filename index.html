@@ -285,32 +285,33 @@
     <section class="view" id="view-sync" hidden>
       <div class="setup-banner glass-panel">
         <h2>Two devices · 100% free</h2>
-        <p>Netlify Drop (free hosting) + Firebase Spark (free database). No credit card.</p>
+        <p>Firebase Spark (free database) + Netlify or GitHub Pages (free hosting). No credit card.</p>
         <div class="setup-steps">
           <div>
-            <h4>Step A · Netlify Drop</h4>
+            <h4>Step A · Public URL (pick one)</h4>
             <ol class="steps">
-              <li>Open <a href="https://app.netlify.com/drop" target="_blank" rel="noopener">app.netlify.com/drop</a></li>
-              <li>Drag this <code>sid</code> folder onto the page</li>
-              <li>Share the free URL with both of you</li>
+              <li><strong>Netlify:</strong> <a href="https://app.netlify.com/drop" target="_blank" rel="noopener">app.netlify.com/drop</a> → drag this whole folder → <strong>Claim this site</strong> (free signup; unclaimed drops die in 1 hour)</li>
+              <li><strong>GitHub Pages:</strong> repo Settings → Pages → branch <code>main</code> / root → <code>https://hassiddarth-cpu.github.io/infogridai/</code></li>
+              <li>Include <code>cloud-config.json</code> in the folder after you connect below</li>
             </ol>
           </div>
           <div>
             <h4>Step B · Firebase Spark</h4>
             <ol class="steps">
-              <li><a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase Console</a> → Create project</li>
-              <li>Realtime Database → test mode</li>
-              <li>Copy web config → paste below → Connect</li>
+              <li><a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase Console</a> → Create project (Spark / free)</li>
+              <li>Add web app → copy <code>firebaseConfig</code></li>
+              <li>Build → Realtime Database → create in <strong>test mode</strong></li>
+              <li>Vault code: <code>infogrid-sprint</code> → paste config below → Connect</li>
             </ol>
           </div>
         </div>
-        <p class="free-note">Free limits are enough for 2 people over 2 months.</p>
+        <p class="free-note">Free limits are enough for 2 people over 2 months. Status must show <strong>CLOUD LIVE</strong>.</p>
       </div>
       <div class="sync-layout">
         <div class="glass-panel">
           <h2>Connect cloud database</h2>
           <form id="syncForm" class="sync-form">
-            <label>Shared vault code<input name="vault" id="vaultInput" placeholder="infogrid-sprint" required /></label>
+            <label>Shared vault code<input name="vault" id="vaultInput" value="infogrid-sprint" placeholder="infogrid-sprint" required /></label>
             <label>Firebase config JSON<textarea name="config" id="configInput" rows="8" required placeholder='{ "apiKey": "...", "databaseURL": "..." }'></textarea></label>
             <div class="sync-actions">
               <button type="submit">Connect cloud</button>

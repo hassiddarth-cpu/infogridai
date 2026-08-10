@@ -6,3 +6,4 @@ cloud-config.json
 .cache/
 data/*.json
 !data/.gitkeep
+infogridai/
