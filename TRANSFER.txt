@@ -1,9 +1,12 @@
-# Infogrid Sprint — other Mac
+# Infogrid Sprint — other Mac / device
 
-1. Copy this whole `sid` folder to the other Mac (AirDrop, USB, iCloud, Git).
-2. Open the folder in Cursor.
-3. Open `ONE-PROMPT.txt`, copy everything under the line, paste into Cursor chat, send.
-4. Follow the agent (Firebase free + Netlify Drop free).
-5. Bookmark the Netlify URL on both phones/laptops.
+Full guide: see **OTHER-DEVICE.md**
 
-After `cloud-config.json` is in the folder and deployed, new devices auto-connect.
+Quick path:
+1. `git clone https://github.com/hassiddarth-cpu/infogridai.git`
+2. Open folder in Cursor
+3. Paste contents of `ONE-PROMPT.txt` into Cursor chat
+4. Follow agent (Firebase free + Netlify Drop free)
+5. Bookmark the Netlify URL on both phones/laptops
+
+After `cloud-config.json` is deployed, new devices can auto-connect.
