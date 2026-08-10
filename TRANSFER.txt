@@ -1,0 +1,9 @@
+# Infogrid Sprint — other Mac
+
+1. Copy this whole `sid` folder to the other Mac (AirDrop, USB, iCloud, Git).
+2. Open the folder in Cursor.
+3. Open `ONE-PROMPT.txt`, copy everything under the line, paste into Cursor chat, send.
+4. Follow the agent (Firebase free + Netlify Drop free).
+5. Bookmark the Netlify URL on both phones/laptops.
+
+After `cloud-config.json` is in the folder and deployed, new devices auto-connect.

@@ -1,0 +1,13 @@
+{
+  "_comment": "Fill this once, then upload the whole folder to Netlify Drop. Both devices will auto-connect.",
+  "vault": "infogrid-sprint",
+  "config": {
+    "apiKey": "PASTE_FROM_FIREBASE",
+    "authDomain": "YOUR_PROJECT.firebaseapp.com",
+    "databaseURL": "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+    "projectId": "YOUR_PROJECT",
+    "storageBucket": "YOUR_PROJECT.appspot.com",
+    "messagingSenderId": "000000000000",
+    "appId": "1:000000000000:web:xxxxxxxxxxxx"
+  }
+}

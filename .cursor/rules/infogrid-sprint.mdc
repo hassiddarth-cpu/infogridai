@@ -1,0 +1,72 @@
+---
+description: Infogrid AI Sprint Tracker — product context, free multi-device setup, and agent duties
+alwaysApply: true
+---
+
+# Infogrid AI · Sprint Command
+
+## What this project is
+Static web app (no build step) for **two people** at agency **Infogrid AI** ([infogridai.com](https://infogridai.com/)):
+
+| Person | Age | Accent |
+|--------|-----|--------|
+| Varsha | 24 | cyan |
+| Siddharth | 25 | green |
+
+**Sprint:** Aug 10 – Sep 30, 2026  
+**Goals:** min **200** cold calls; learn ads; ship Infogrid AI voice automation GTM.
+
+## Files (keep simple)
+- `index.html` — UI shell
+- `styles.css` — Infogrid brand (cyan `#2de2ff` / green `#3dff9a`, Sora + IBM Plex Mono)
+- `app.js` — state, Firebase sync, clock-in/out, analytics
+- `cloud-config.example.json` — template for free cloud auto-connect
+- `netlify.toml` — free Netlify Drop hosting
+- `start.sh` — local preview `python3 -m http.server 8765`
+- `ONE-PROMPT.txt` — paste this in Cursor on another Mac to finish setup
+
+## Visual style (user preferred)
+Centered **Sprint Tracker** glass HUD (not sidebar):
+- Deep navy + blue/pink glows, glass cards, Syne + Outfit
+- **Varsha = blue `#3d9bff`**, **Siddharth = pink `#ff4db8`**
+- Dual progress rings, pill stats, segmented Today/Month/Analytics/Goals/Sync tabs
+- Keep clock-in/out, cold-call outcomes, area, Firebase sync when restyling
+
+- Daily logs for both people (cold calls + ads + custom)
+- Call results: `connected` (owner), `busy`, `voicemail`, `failed`, `gatekeeper`
+- Area field (Houston, Texas, etc.)
+- Clock in / clock out + live duration + team hours
+- Month grid, analytics (pace to 200, outcomes, areas, hours), goals
+- Firebase Realtime Database sync + invite copy + `cloud-config.json` auto-load
+- Cloud gate onboarding for multi-device
+
+## Free multi-device (required for two devices)
+Laptop-local / `localStorage` alone is **not** enough. Must use:
+
+1. **Netlify Drop** (free hosting) — drag `sid` folder → public URL  
+2. **Firebase Spark** (free DB) — Realtime Database test mode + same vault code on both devices  
+
+After connect: both phones/laptops sync live even if original Mac is off.
+
+### Agent setup checklist when user asks to “make it work on other devices” / “finish cloud”
+1. Confirm `index.html` / `app.js` / Sync UI still have Netlify + Firebase free steps  
+2. Help user create Firebase project (Spark) + Realtime DB test mode if not done  
+3. Help paste `firebaseConfig` + vault (default `infogrid-sprint`) → Connect  
+4. Generate/download `cloud-config.json` from connected config; place in project root  
+5. Guide Netlify Drop deploy of whole folder (including `cloud-config.json`)  
+6. Tell user to open Netlify URL on device 2 — should auto-connect if `cloud-config.json` is deployed  
+7. Verify status shows **CLOUD LIVE**  
+8. Never require paid plans or credit cards  
+
+### Local run
+```bash
+./start.sh
+# or: python3 -m http.server 8765
+# open http://127.0.0.1:8765
+```
+ES modules / file:// may break Firebase; prefer http.server or Netlify URL.
+
+## Do not
+- Add heavy frameworks unless asked (keep static HTML/CSS/JS)
+- Put secrets that are truly private in git; Firebase web config is public-by-design but vault path should stay non-obvious
+- Break clock-in/out, call outcomes, or 200-call pace math when restyling

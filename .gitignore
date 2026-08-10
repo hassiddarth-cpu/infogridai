@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+cloud-config.json
+.firebase/
+*.log
+.cache/
+data/*.json
+!data/.gitkeep

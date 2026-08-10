@@ -1,0 +1,32 @@
+Paste this entire message into Cursor on the other Mac (after opening the `sid` folder).
+
+---
+
+You are setting up Infogrid AI Sprint Command for TWO people (Varsha 24 + Siddharth 25) on DIFFERENT devices using ONLY free tools.
+
+Project is already built as static files: index.html, styles.css, app.js. Read `.cursor/rules/infogrid-sprint.mdc` and follow it.
+
+GOAL: Both of us must open the same public URL and sync live via Firebase even when any laptop is off. No paid plans. No credit card.
+
+Do this end-to-end now:
+
+1. Inspect the project and confirm Sync / cloud gate / Netlify + Firebase free flow still works.
+2. Start local preview with `./start.sh` or `python3 -m http.server 8765` and open http://127.0.0.1:8765 so I can test.
+3. Walk me through (or automate what you can):
+   A) Firebase Spark (free): create project → Realtime Database in test mode → web app firebaseConfig.
+   B) In the app Sync tab: vault code `infogrid-sprint` + paste config → Connect cloud → status CLOUD LIVE.
+   C) Download or write `cloud-config.json` in the project root with { "vault", "config" } so other devices auto-connect.
+   D) Netlify Drop (free): deploy the whole sid folder including cloud-config.json → give me the public URL.
+4. Give me a short checklist for the second person/device:
+   - Open the Netlify URL
+   - Confirm CLOUD LIVE (or paste invite once if needed)
+   - Clock in → log cold calls (connected/busy/voicemail/failed/gatekeeper + area) → clock out
+5. If anything is broken in sync/UI, fix the code, keep it static HTML/CSS/JS, keep Infogrid brand (cyan/green), keep 200-call goal and clock-in/out.
+
+When done, reply with:
+- Public URL
+- Vault code
+- Confirmation that free Firebase + Netlify are connected
+- Exact steps for device #2
+
+---

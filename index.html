@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Infogrid AI · Sprint Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-base" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--blue" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--pink" aria-hidden="true"></div>
+  <div class="bg-vignette" aria-hidden="true"></div>
+
+  <div class="app">
+    <header class="hero">
+      <div class="hero-top">
+        <a class="brand" href="https://infogridai.com/" target="_blank" rel="noopener">
+          <span class="brand-mark"></span>
+          <span class="brand-name">INFOGRID AI</span>
+        </a>
+        <div class="hero-meta">
+          <div class="pill" id="syncStatus"><i class="pulse"></i><span>LOCAL</span></div>
+          <div class="clock" id="liveClock">--:--:--</div>
+        </div>
+      </div>
+
+      <p class="hero-kicker">Agency sprint · Aug–Sep 2026</p>
+      <h1 class="title">Sprint Tracker</h1>
+      <p class="sprint-range" id="sprintRange">Aug 10 – Sep 30, 2026</p>
+
+      <div class="progress-duo" aria-label="Sprint progress">
+        <svg class="ring ring--varsha" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="ring-track" cx="60" cy="60" r="52" />
+          <circle class="ring-fill" id="ringVarsha" cx="60" cy="60" r="52" />
+        </svg>
+        <svg class="ring ring--sid" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="ring-track" cx="60" cy="60" r="52" />
+          <circle class="ring-fill" id="ringSid" cx="60" cy="60" r="52" />
+        </svg>
+        <div class="progress-center">
+          <span class="progress-pct" id="combinedPct">0%</span>
+          <span class="progress-label">sprint</span>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat"><span class="stat-label">Today done by both</span><span class="stat-value" id="bothDone">Not yet</span></div>
+        <div class="stat"><span class="stat-label">Days logged</span><span class="stat-value" id="daysLogged">0</span></div>
+        <div class="stat"><span class="stat-label">Days left</span><span class="stat-value" id="daysLeft">—</span></div>
+        <div class="stat"><span class="stat-label">Calls</span><span class="stat-value"><span id="totalCalls">0</span>/<span id="callTarget">200</span></span></div>
+        <div class="stat"><span class="stat-label">Owner connects</span><span class="stat-value" id="meetingsBooked">0</span></div>
+        <div class="stat"><span class="stat-label">Team hours</span><span class="stat-value" id="teamHoursToday">0h 00m</span></div>
+      </div>
+
+      <div class="pace-bar-wrap">
+        <div class="pace-bar-top"><span>200-call pace</span><span id="callPct">0%</span></div>
+        <div class="progress-line"><i id="callBar"></i></div>
+        <div class="pace-meta">
+          <span>Need <b id="needPerDay">—</b>/day</span>
+          <span>Avg <b id="avgPerDay">0</b>/day</span>
+          <span id="paceStatus" class="pace-chip">On pace</span>
+          <span>Streak <b id="streak">0</b></span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab rail-btn is-active" data-view="today">Today</button>
+      <button class="tab rail-btn" data-view="month">Month</button>
+      <button class="tab rail-btn" data-view="logs">Analytics</button>
+      <button class="tab rail-btn" data-view="goals">Goals</button>
+      <button class="tab rail-btn" data-view="sync">Sync</button>
+    </nav>
+
+    <section class="date-bar" id="dateBar">
+      <button class="icon-btn" id="prevDay" type="button">‹</button>
+      <div class="date-display">
+        <span id="selectedDateLabel">Mon, 10 Aug 2026</span>
+        <button class="chip" id="jumpToday" type="button">Today</button>
+      </div>
+      <button class="icon-btn" id="nextDay" type="button">›</button>
+    </section>
+
+    <svg class="sr-only" aria-hidden="true"><circle id="callRing" /></svg>
+
+    <section class="view is-active" id="view-today">
+      <div class="people">
+        <article class="person person--varsha" data-person="varsha">
+          <header class="person-head">
+            <div>
+              <h2>Varsha <span class="age">24</span></h2>
+              <span class="dot" aria-hidden="true"></span>
+            </div>
+            <div class="person-pct" id="varshaDayPct">0/0 · 0%</div>
+          </header>
+
+          <div class="timebox" data-time="varsha">
+            <div class="timebox-status">
+              <span class="live-dot" id="live-varsha" hidden></span>
+              <div><small>Session</small><strong id="sessionState-varsha">Off shift</strong></div>
+            </div>
+            <div class="timebox-times">
+              <div><small>In</small><b id="clockIn-varsha">—</b></div>
+              <div><small>Out</small><b id="clockOut-varsha">—</b></div>
+              <div><small>Total</small><b id="duration-varsha">0h 00m</b></div>
+            </div>
+            <div class="timebox-actions">
+              <button type="button" class="btn-in" data-clock="in" data-person="varsha">Clock in</button>
+              <button type="button" class="btn-out" data-clock="out" data-person="varsha">Clock out</button>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <button type="button" data-quick="Cold call" data-cat="sales">+ Sales call</button>
+            <button type="button" data-quick="Ad learning" data-cat="ads">+ Ad learning</button>
+            <button type="button" data-quick="" data-cat="custom" class="custom-toggle">+ Custom task</button>
+          </div>
+
+          <form class="task-form" data-person="varsha">
+            <input type="text" name="title" placeholder="What did you do?" required autocomplete="off" />
+            <select name="category">
+              <option value="sales" selected>Sales</option>
+              <option value="ads">Ads</option>
+              <option value="learning">Learning</option>
+              <option value="ops">Ops</option>
+              <option value="other">Other</option>
+            </select>
+            <select name="outcome">
+              <option value="">Result</option>
+              <option value="connected">Connected (owner)</option>
+              <option value="busy">Busy</option>
+              <option value="voicemail">Voicemail</option>
+              <option value="failed">Failed</option>
+              <option value="gatekeeper">Gatekeeper</option>
+            </select>
+            <input type="text" name="area" list="area-suggestions" placeholder="Area" autocomplete="off" />
+            <button type="submit">Add</button>
+          </form>
+
+          <ul class="task-list" id="tasks-varsha"></ul>
+          <p class="empty" id="empty-varsha">No tasks logged yet for this day.</p>
+          <label class="notes">
+            <span>Notes for the day</span>
+            <textarea id="notes-varsha" rows="3" placeholder="Reflections, blockers, wins…"></textarea>
+          </label>
+        </article>
+
+        <article class="person person--sid" data-person="siddharth">
+          <header class="person-head">
+            <div>
+              <h2>Siddharth <span class="age">25</span></h2>
+              <span class="dot" aria-hidden="true"></span>
+            </div>
+            <div class="person-pct" id="sidDayPct">0/0 · 0%</div>
+          </header>
+
+          <div class="timebox" data-time="siddharth">
+            <div class="timebox-status">
+              <span class="live-dot" id="live-siddharth" hidden></span>
+              <div><small>Session</small><strong id="sessionState-siddharth">Off shift</strong></div>
+            </div>
+            <div class="timebox-times">
+              <div><small>In</small><b id="clockIn-siddharth">—</b></div>
+              <div><small>Out</small><b id="clockOut-siddharth">—</b></div>
+              <div><small>Total</small><b id="duration-siddharth">0h 00m</b></div>
+            </div>
+            <div class="timebox-actions">
+              <button type="button" class="btn-in" data-clock="in" data-person="siddharth">Clock in</button>
+              <button type="button" class="btn-out" data-clock="out" data-person="siddharth">Clock out</button>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <button type="button" data-quick="Cold call" data-cat="sales">+ Sales call</button>
+            <button type="button" data-quick="Ad learning" data-cat="ads">+ Ad learning</button>
+            <button type="button" data-quick="" data-cat="custom" class="custom-toggle">+ Custom task</button>
+          </div>
+
+          <form class="task-form" data-person="siddharth">
+            <input type="text" name="title" placeholder="What did you do?" required autocomplete="off" />
+            <select name="category">
+              <option value="sales" selected>Sales</option>
+              <option value="ads">Ads</option>
+              <option value="learning">Learning</option>
+              <option value="ops">Ops</option>
+              <option value="other">Other</option>
+            </select>
+            <select name="outcome">
+              <option value="">Result</option>
+              <option value="connected">Connected (owner)</option>
+              <option value="busy">Busy</option>
+              <option value="voicemail">Voicemail</option>
+              <option value="failed">Failed</option>
+              <option value="gatekeeper">Gatekeeper</option>
+            </select>
+            <input type="text" name="area" list="area-suggestions" placeholder="Area" autocomplete="off" />
+            <button type="submit">Add</button>
+          </form>
+
+          <ul class="task-list" id="tasks-siddharth"></ul>
+          <p class="empty" id="empty-siddharth">No tasks logged yet for this day.</p>
+          <label class="notes">
+            <span>Notes for the day</span>
+            <textarea id="notes-siddharth" rows="3" placeholder="Reflections, blockers, wins…"></textarea>
+          </label>
+        </article>
+      </div>
+
+      <datalist id="area-suggestions">
+        <option value="Houston"></option>
+        <option value="Texas"></option>
+        <option value="Dallas"></option>
+        <option value="Austin"></option>
+        <option value="San Antonio"></option>
+        <option value="Fort Worth"></option>
+      </datalist>
+    </section>
+
+    <section class="view" id="view-month" hidden>
+      <div class="month-nav">
+        <button class="icon-btn" id="prevMonth" type="button">‹</button>
+        <h2 id="monthLabel">August 2026</h2>
+        <button class="icon-btn" id="nextMonth" type="button">›</button>
+      </div>
+      <div class="month-legend">
+        <span><i class="swatch swatch--varsha"></i> Varsha</span>
+        <span><i class="swatch swatch--sid"></i> Siddharth</span>
+        <span><i class="swatch swatch--both"></i> Both</span>
+      </div>
+      <div class="calendar" id="calendar"></div>
+      <div class="month-summary" id="monthSummary"></div>
+    </section>
+
+    <section class="view" id="view-logs" hidden>
+      <div class="logs-head">
+        <h2>Analytics</h2>
+        <p>Call pace, results, areas, hours.</p>
+      </div>
+      <div class="avg-board" id="avgBoard"></div>
+      <div class="logs-kpis" id="logsKpis"></div>
+      <div class="logs-grid">
+        <div class="glass-panel"><h3>Monthly calls</h3><div id="monthlyCallsChart" class="bars"></div></div>
+        <div class="glass-panel"><h3>Call results</h3><div id="outcomesBreakdown" class="bars"></div></div>
+        <div class="glass-panel"><h3>By area</h3><div id="areaBreakdown" class="bars"></div></div>
+        <div class="glass-panel"><h3>Team</h3><div id="operatorCompare" class="bars"></div></div>
+        <div class="glass-panel wide"><h3>Activity</h3><ul class="feed" id="activityFeed"></ul></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-goals" hidden>
+      <div class="goals-guide glass-panel">
+        <h2>Goal inputs for averages</h2>
+        <div class="guide-grid">
+          <div><h4>Target</h4><p>e.g. 200 cold calls</p></div>
+          <div><h4>Category</h4><p>From daily logs</p></div>
+          <div><h4>Owner</h4><p>Both / Varsha / Siddharth</p></div>
+          <div><h4>Result + area</h4><p>Connected, busy, voicemail, failed, gatekeeper</p></div>
+        </div>
+      </div>
+      <div class="goals-grid" id="goalsGrid"></div>
+      <form class="goal-form glass-panel" id="goalForm">
+        <h3>Add goal</h3>
+        <div class="goal-form-row">
+          <input type="text" name="title" placeholder="Goal title" required />
+          <select name="owner">
+            <option value="both">Both</option>
+            <option value="varsha">Varsha</option>
+            <option value="siddharth">Siddharth</option>
+          </select>
+          <input type="number" name="target" min="1" value="200" />
+          <select name="unit">
+            <option value="sales calls" selected>sales calls</option>
+            <option value="ad sessions">ad sessions</option>
+            <option value="tasks">tasks</option>
+          </select>
+          <button type="submit">Add</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="view" id="view-sync" hidden>
+      <div class="setup-banner glass-panel">
+        <h2>Two devices · 100% free</h2>
+        <p>Netlify Drop (free hosting) + Firebase Spark (free database). No credit card.</p>
+        <div class="setup-steps">
+          <div>
+            <h4>Step A · Netlify Drop</h4>
+            <ol class="steps">
+              <li>Open <a href="https://app.netlify.com/drop" target="_blank" rel="noopener">app.netlify.com/drop</a></li>
+              <li>Drag this <code>sid</code> folder onto the page</li>
+              <li>Share the free URL with both of you</li>
+            </ol>
+          </div>
+          <div>
+            <h4>Step B · Firebase Spark</h4>
+            <ol class="steps">
+              <li><a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase Console</a> → Create project</li>
+              <li>Realtime Database → test mode</li>
+              <li>Copy web config → paste below → Connect</li>
+            </ol>
+          </div>
+        </div>
+        <p class="free-note">Free limits are enough for 2 people over 2 months.</p>
+      </div>
+      <div class="sync-layout">
+        <div class="glass-panel">
+          <h2>Connect cloud database</h2>
+          <form id="syncForm" class="sync-form">
+            <label>Shared vault code<input name="vault" id="vaultInput" placeholder="infogrid-sprint" required /></label>
+            <label>Firebase config JSON<textarea name="config" id="configInput" rows="8" required placeholder='{ "apiKey": "...", "databaseURL": "..." }'></textarea></label>
+            <div class="sync-actions">
+              <button type="submit">Connect cloud</button>
+              <button type="button" class="ghost" id="copyInvite">Copy invite</button>
+              <button type="button" class="ghost" id="disconnectSync">Disconnect</button>
+            </div>
+          </form>
+          <p class="sync-hint" id="syncHint">Not connected — only this browser has data.</p>
+        </div>
+        <div class="glass-panel">
+          <h2>Backup</h2>
+          <div class="data-actions">
+            <button type="button" class="ghost-btn" id="exportData">Export</button>
+            <label class="ghost-btn file-label">Import<input type="file" id="importData" accept="application/json" hidden /></label>
+            <button type="button" class="ghost-btn" id="downloadCloudConfig">Download cloud-config.json</button>
+          </div>
+          <button type="button" class="danger-btn" id="clearData">Clear all data</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <button type="button" class="danger-btn clear-inline" id="clearDataFooter" hidden>Clear all tracker data</button>
+      <a href="https://infogridai.com/" target="_blank" rel="noopener">infogridai.com</a>
+      <span class="sep">·</span>
+      <span id="jarvisLine">Infogrid AI · Sprint Tracker</span>
+    </footer>
+  </div>
+
+  <div class="cloud-gate" id="cloudGate" hidden>
+    <div class="cloud-gate-card">
+      <p class="eyebrow">100% free · multi-device</p>
+      <h2>Connect free cloud so both of you can fill this anytime</h2>
+      <p>Netlify Drop + Firebase Spark. No credit card. Sync even when this Mac is off.</p>
+      <div class="cloud-gate-actions">
+        <button type="button" class="gate-primary" id="gateOpenSync">Set up cloud sync</button>
+        <button type="button" class="gate-secondary" id="gateDismiss">Continue on this device only</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

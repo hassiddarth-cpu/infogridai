@@ -1,0 +1,11 @@
+{
+  "publish": ".",
+  "headers": [
+    {
+      "for": "/*",
+      "values": {
+        "X-Frame-Options": "DENY"
+      }
+    }
+  ]
+}
