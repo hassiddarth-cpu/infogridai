@@ -1,6 +1,10 @@
-Paste this entire message into Cursor on the other Mac (after opening the `infogridai` folder).
+SHORT LINE (preferred) — paste only this after opening `infogridai` in Cursor:
+
+Read CURSOR-PROMPT.txt and do everything in it. Walk me through free Firebase + free hosting until CLOUD LIVE, then push any doc updates to git.
 
 ---
+
+OR paste this full message (same idea as CURSOR-PROMPT.txt):
 
 You are setting up Infogrid AI Sprint Tracker for TWO people (Varsha 24 + Siddharth 25) on DIFFERENT devices using ONLY free tools.
 

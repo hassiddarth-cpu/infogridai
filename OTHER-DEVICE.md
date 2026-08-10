@@ -14,8 +14,14 @@ cd infogridai
 ### 2. Open in Cursor
 Open the `infogridai` folder.
 
-### 3. Paste this prompt in Cursor chat
-(Same content as below — also in `ONE-PROMPT.txt`.)
+### 3. Paste this short line in Cursor chat
+```
+Read CURSOR-PROMPT.txt and do everything in it. Walk me through free Firebase + free hosting until CLOUD LIVE, then push any doc updates to git.
+```
+(Same short line is in `SAY-THIS.txt`. Full instructions are in `CURSOR-PROMPT.txt`.)
+
+### Full prompt (optional — if you prefer pasting everything)
+Also in `ONE-PROMPT.txt` / `CURSOR-PROMPT.txt`.
 
 ```
 You are setting up Infogrid AI Sprint Tracker for TWO people (Varsha 24 + Siddharth 25) on DIFFERENT devices using ONLY free tools.

@@ -1,0 +1,73 @@
+# Infogrid AI — full Cursor setup prompt
+# On any Mac: open the `infogridai` folder in Cursor, then paste EVERYTHING below this line into chat.
+
+---
+
+Read `CURSOR-PROMPT.txt` and `.cursor/rules/infogrid-sprint.mdc`. Follow them end-to-end. Do not stop until free multi-device sync works or you are blocked only by my Google/Netlify login clicks.
+
+## Project
+Static Infogrid AI Sprint Tracker for TWO people:
+- Varsha (24) — blue accent
+- Siddharth (25) — pink accent
+Sprint: Aug 10 – Sep 30, 2026. Goal: 200 cold calls + ads + Infogrid GTM.
+Files: `index.html`, `styles.css`, `app.js` (no heavy frameworks).
+Repo: https://github.com/hassiddarth-cpu/infogridai
+
+## Goal
+Both devices use ONE public URL + Firebase Spark sync even when any laptop is off.
+ONLY free tools. No paid plans. No credit card required.
+
+## Do this end-to-end
+
+### 1) Confirm app
+- Verify Sync tab, cloud gate, clock-in/out, call outcomes, area, 200-call pace still work.
+- Keep blue/pink glass Sprint Tracker UI.
+- Start local preview: `./start.sh` or `python3 -m http.server 8765` → http://127.0.0.1:8765
+
+### 2) Walk me through Firebase (FREE Spark)
+I must click; you give exact clicks:
+A) https://console.firebase.google.com → Create project (Spark / free)
+B) Add web app → copy `firebaseConfig`
+C) Build → Realtime Database → create in test mode
+D) Tell me exact vault path to use: `infogrid-sprint`
+
+### 3) Connect in app
+- Open Sync tab
+- Vault: `infogrid-sprint`
+- Paste firebaseConfig → Connect
+- Confirm status shows **CLOUD LIVE**
+- Help me download / save `cloud-config.json` into project root (gitignored is OK)
+
+### 4) Free public hosting (NO 1-hour trap)
+Explain clearly: anonymous Netlify Drop dies in 1 hour unless claimed.
+Prefer one of these free forever paths:
+
+**Path A — Netlify Drop + Claim (free)**
+1. https://app.netlify.com/drop
+2. Drag the WHOLE `infogridai` folder (not only index.html), include `cloud-config.json` if present
+3. Click **Claim this site** → Sign up FREE Starter (no card)
+4. Give me the permanent public URL
+
+**Path B — GitHub Pages (free)**
+1. Repo Settings → Pages → Deploy from branch `main` / root
+2. Public URL like `https://hassiddarth-cpu.github.io/infogridai/`
+3. Repo must be public for free Pages
+
+### 5) Device 2 checklist
+1. Open the public URL (not localhost)
+2. Status **CLOUD LIVE** (or connect once with same vault + config / invite)
+3. Same vault: `infogrid-sprint`
+4. Clock in → log cold calls → clock out
+
+### 6) Git
+- Commit helpful doc/config template updates if needed (never commit real secrets that must stay private; Firebase web config is public-by-design)
+- Push to `origin main` when I ask, or when setup docs change and I want the other Mac to `git pull`
+
+### 7) Reply format when done
+- Public URL: …
+- Vault code: `infogrid-sprint`
+- Confirmation: free Firebase Spark + free hosting connected (CLOUD LIVE)
+- Device 2 steps: short checklist
+- If blocked: exact next click I must do (login screen name)
+
+Fix bugs if needed. Keep static HTML/CSS/JS.

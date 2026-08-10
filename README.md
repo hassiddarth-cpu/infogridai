@@ -15,12 +15,20 @@ Shared sprint tracker for **Infogrid AI** — Varsha & Siddharth.
 ```
 
 ## Other device (clone from Git)
-See **[OTHER-DEVICE.md](./OTHER-DEVICE.md)** — clone, open in Cursor, paste `ONE-PROMPT.txt`.
+See **[OTHER-DEVICE.md](./OTHER-DEVICE.md)**.
 
 ```bash
 git clone https://github.com/hassiddarth-cpu/infogridai.git
 cd infogridai
 ```
+
+Open folder in Cursor, then paste:
+
+```
+Read CURSOR-PROMPT.txt and do everything in it. Walk me through free Firebase + free hosting until CLOUD LIVE, then push any doc updates to git.
+```
+
+(`SAY-THIS.txt` = short line · `CURSOR-PROMPT.txt` = full instructions)
 
 ## Deploy (free forever — no credit card)
 

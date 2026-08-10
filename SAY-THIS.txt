@@ -1,0 +1,3 @@
+Paste this ONE line into Cursor chat after opening the `infogridai` folder:
+
+Read CURSOR-PROMPT.txt and do everything in it. Walk me through free Firebase + free hosting until CLOUD LIVE, then push any doc updates to git.
