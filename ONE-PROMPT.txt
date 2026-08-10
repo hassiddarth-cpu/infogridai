@@ -15,10 +15,10 @@ Do this end-to-end:
    A) Firebase Spark → Realtime Database test mode → web firebaseConfig
    B) Sync tab: vault infogrid-sprint + config → Connect → CLOUD LIVE
    C) Save cloud-config.json in project root
-   D) Netlify Drop deploy of whole folder → give public URL
-4. Checklist for device 2: open Netlify URL → CLOUD LIVE → clock in → log calls → clock out
-5. Fix bugs if needed; keep static HTML/CSS/JS; blue/pink theme; 200-call goal; clock-in/out.
+   D) Free public URL: drag WHOLE folder to Netlify Drop, then Claim with FREE Netlify account (no credit card — unclaimed drops die in 1 hour). Or enable GitHub Pages on this repo.
+4. Checklist for device 2: open public URL → CLOUD LIVE → clock in → log calls → clock out
+5. Fix bugs if needed; keep static HTML/CSS/JS; blue/pink theme; 200-call goal; clock-in/out. Never require paid plans.
 
-Reply with: Public URL, vault code, confirmation free Firebase+Netlify connected, steps for device 2.
+Reply with: Public URL, vault code, confirmation free Firebase+hosting connected, steps for device 2.
 
 ---

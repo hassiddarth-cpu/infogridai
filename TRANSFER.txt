@@ -6,7 +6,8 @@ Quick path:
 1. `git clone https://github.com/hassiddarth-cpu/infogridai.git`
 2. Open folder in Cursor
 3. Paste contents of `ONE-PROMPT.txt` into Cursor chat
-4. Follow agent (Firebase free + Netlify Drop free)
-5. Bookmark the Netlify URL on both phones/laptops
+4. Follow agent (Firebase Spark free + Netlify free claim OR GitHub Pages)
+5. Bookmark the public URL on both phones/laptops
+   Note: Netlify Drop without “Claim this site” dies in 1 hour — claim with free account, no card.
 
 After `cloud-config.json` is deployed, new devices can auto-connect.

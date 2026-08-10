@@ -22,7 +22,20 @@ git clone https://github.com/hassiddarth-cpu/infogridai.git
 cd infogridai
 ```
 
-## Deploy (free)
-1. Drag this folder to [Netlify Drop](https://app.netlify.com/drop)
-2. Connect Firebase Realtime Database (Spark / free) in the **Sync** tab
-3. Share the Netlify URL with both devices
+## Deploy (free forever — no credit card)
+
+**Important:** Netlify Drop without an account dies after **1 hour**. That is not a paid wall — sign up free and **Claim this site**.
+
+### Option A — Netlify (easiest)
+1. Go to [app.netlify.com/drop](https://app.netlify.com/drop)
+2. Drag the **whole folder** (`infogridai`), not only `index.html`
+3. Click **Claim this site** → **Sign up for free** (Starter plan — no payment)
+4. Bookmark the public URL (e.g. `https://something.netlify.app`)
+5. Connect Firebase in the app **Sync** tab (Spark / free)
+
+### Option B — GitHub Pages (also free)
+1. Repo → **Settings** → **Pages** → Source: **Deploy from a branch**
+2. Branch: `main` / folder: `/ (root)` → Save
+3. URL: `https://hassiddarth-cpu.github.io/infogridai/` (if repo is public)
+
+Sync still uses **Firebase Spark** (free). Hosting is only the public URL.

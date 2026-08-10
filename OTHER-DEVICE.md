@@ -31,25 +31,33 @@ Do this end-to-end:
    A) Firebase Spark → Realtime Database test mode → web firebaseConfig
    B) Sync tab: vault infogrid-sprint + config → Connect → CLOUD LIVE
    C) Save cloud-config.json in project root
-   D) Netlify Drop deploy of whole folder → give public URL
-4. Checklist for device 2: open Netlify URL → CLOUD LIVE → clock in → log calls → clock out
+   D) Free public URL: Netlify Drop WHOLE folder → Claim with FREE account (no card; unclaimed = 1 hour only) OR GitHub Pages
+4. Checklist for device 2: open public URL → CLOUD LIVE → clock in → log calls → clock out
 5. Fix bugs if needed; keep static HTML/CSS/JS; blue/pink theme; 200-call goal; clock-in/out.
 
-Reply with: Public URL, vault code, confirmation free Firebase+Netlify connected, steps for device 2.
+Reply with: Public URL, vault code, confirmation free Firebase+hosting connected, steps for device 2.
 ```
+
+## Free hosting (no pay)
+
+| Problem | Fix |
+|---------|-----|
+| Site dies in 1 hour | You did **not** claim it. Sign up free Netlify → **Claim this site** |
+| Asks for money | Stay on **Starter / free**. Never enter a card |
+| Can’t upload full project | Drag the **folder**, not one file. Or use GitHub Pages from this repo |
 
 ## After cloud is set (both devices)
 
 | Step | What to do |
 |------|------------|
-| 1 | Open the **Netlify URL** (not only localhost) |
+| 1 | Open the **public URL** (Netlify or GitHub Pages — not only localhost) |
 | 2 | Status should show **CLOUD LIVE** |
 | 3 | Same vault: `infogrid-sprint` |
 | 4 | **Clock in** → log cold calls → **Clock out** |
 
-## Shortcut if Mac #1 already finished Netlify + Firebase
+## Shortcut if Mac #1 already finished hosting + Firebase
 
 Other device only needs:
-1. Open the Netlify link
+1. Open the public link
 2. If asked, paste the invite / connect once
 3. Start logging
