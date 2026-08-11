@@ -33,17 +33,6 @@
       <p class="sprint-range" id="sprintRange">Aug 10 – Sep 30, 2026</p>
       <p class="sprint-today-hint">Selected day is below in Today · sprint window starts Aug 10</p>
 
-      <div class="countdown-row countdown-row--simple" aria-label="Countdowns">
-        <div class="countdown">
-          <span class="countdown-label">Month end</span>
-          <strong class="countdown-value" id="cdMonth">—</strong>
-        </div>
-        <div class="countdown">
-          <span class="countdown-label">Year end</span>
-          <strong class="countdown-value" id="cdYear">—</strong>
-        </div>
-      </div>
-
       <div class="progress-duo" aria-label="Sprint progress">
         <svg class="ring ring--varsha" viewBox="0 0 120 120" aria-hidden="true">
           <circle class="ring-track" cx="60" cy="60" r="52" />
@@ -63,6 +52,8 @@
         <div class="stat"><span class="stat-label">Today done by both</span><span class="stat-value" id="bothDone">Not yet</span></div>
         <div class="stat"><span class="stat-label">Days logged</span><span class="stat-value" id="daysLogged">0</span></div>
         <div class="stat"><span class="stat-label">Days left</span><span class="stat-value" id="daysLeft">—</span></div>
+        <div class="stat"><span class="stat-label">Month end</span><span class="stat-value" id="cdMonth">—</span></div>
+        <div class="stat"><span class="stat-label">Year end</span><span class="stat-value" id="cdYear">—</span></div>
         <div class="stat"><span class="stat-label">Calls</span><span class="stat-value"><span id="totalCalls">0</span>/<span id="callTarget">200</span></span></div>
         <div class="stat"><span class="stat-label">Owner connects</span><span class="stat-value" id="meetingsBooked">0</span></div>
         <div class="stat"><span class="stat-label">Team hours</span><span class="stat-value" id="teamHoursToday">0h 00m</span></div>
@@ -385,7 +376,7 @@
     <div class="coach-panel" id="aiCoach" hidden>
       <div class="ai-coach-head">
         <div class="ai-avatar" aria-hidden="true">
-          <svg viewBox="0 0 48 48" width="28" height="28"><circle cx="24" cy="18" r="10" fill="#061018"/><rect x="10" y="26" width="28" height="16" rx="6" fill="#061018"/><circle cx="19" cy="17" r="2.2" fill="#4aa3ff"/><circle cx="29" cy="17" r="2.2" fill="#ff5ec8"/><rect x="18" y="33" width="12" height="3" rx="1.5" fill="#3dd68c"/><circle cx="24" cy="6" r="2" fill="#061018"/><rect x="23" y="6" width="2" height="4" fill="#061018"/></svg>
+          <img src="logo.png" alt="" width="28" height="28" />
         </div>
         <div>
           <h2>Infogrid Coach</h2>
@@ -398,19 +389,7 @@
     </div>
     <button type="button" class="coach-fab" id="coachFab" aria-label="Open Infogrid Coach">
       <span class="coach-badge" id="coachBadge" hidden>1</span>
-      <svg class="coach-robot" viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="30" fill="url(#cg)" opacity="0.25"/>
-        <defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4aa3ff"/><stop offset="1" stop-color="#ff5ec8"/></linearGradient></defs>
-        <rect x="14" y="22" width="36" height="28" rx="10" fill="#0b1224" stroke="#fff" stroke-width="2"/>
-        <circle cx="32" cy="18" r="10" fill="#0b1224" stroke="#fff" stroke-width="2"/>
-        <circle cx="27" cy="17" r="2.5" fill="#4aa3ff"/>
-        <circle cx="37" cy="17" r="2.5" fill="#ff5ec8"/>
-        <rect x="24" y="34" width="16" height="4" rx="2" fill="#3dd68c"/>
-        <circle cx="32" cy="8" r="2.5" fill="#fff"/>
-        <rect x="31" y="8" width="2" height="5" fill="#fff"/>
-        <rect x="10" y="30" width="5" height="12" rx="2" fill="#fff"/>
-        <rect x="49" y="30" width="5" height="12" rx="2" fill="#fff"/>
-      </svg>
+      <img class="coach-logo" src="logo.png" width="48" height="48" alt="Infogrid AI Coach" />
     </button>
   </div>
 
