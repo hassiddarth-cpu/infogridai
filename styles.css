@@ -159,44 +159,73 @@ a:hover { text-decoration: underline; }
   letter-spacing: 0.02em;
 }
 
-/* Same voice as “Agency sprint · Aug–Sep 2026” */
-.hero-meta-line {
-  margin: 0 0 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: baseline;
-  gap: 0.35rem 0.55rem;
-  font-size: 0.75rem;
+/* Hero tiles — same glass as pace bar; kickers like Agency sprint */
+.hero-metrics {
+  display: grid;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto 0.85rem;
+}
+.hero-metrics--time {
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 1rem;
+}
+.hero-metrics--daily,
+.hero-metrics--more {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.hero-metrics--more {
+  margin-bottom: 1.15rem;
+}
+.hero-tile {
+  padding: 0.85rem 0.9rem;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(74,163,255,0.06), rgba(255,94,200,0.04));
+  text-align: center;
+}
+.hero-tile--month {
+  border-color: rgba(74, 163, 255, 0.22);
+  background: linear-gradient(135deg, rgba(74,163,255,0.12), rgba(255,255,255,0.02));
+}
+.hero-tile--year {
+  border-color: rgba(255, 94, 200, 0.22);
+  background: linear-gradient(135deg, rgba(255,94,200,0.1), rgba(255,255,255,0.02));
+}
+.hero-tile__kicker {
+  display: block;
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--sid);
-  line-height: 1.55;
 }
-.hero-meta-line--below {
-  margin: 0 0 0.35rem;
-  color: var(--varsha);
-}
-.hero-meta-line--soft {
-  margin: 0 0 1.15rem;
+.hero-tile--month .hero-tile__kicker { color: var(--varsha); }
+.hero-tile--year .hero-tile__kicker { color: var(--sid); }
+.hero-metrics--daily .hero-tile__kicker,
+.hero-metrics--more .hero-tile__kicker {
   color: var(--muted);
   letter-spacing: 0.1em;
 }
-.meta-dot {
-  opacity: 0.45;
-  font-weight: 500;
-}
-.meta-pair b {
-  font-weight: 700;
-  letter-spacing: 0.04em;
+.hero-tile__value {
+  display: block;
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: #eef2ff;
   font-variant-numeric: tabular-nums;
-  color: #f2f5ff;
 }
-.meta-pair--month { color: var(--varsha); }
-.meta-pair--year { color: var(--sid); }
-.meta-pair--month b { color: #c5e2ff; }
-.meta-pair--year b { color: #ffc6e8; }
+.hero-metrics--time .hero-tile__value {
+  font-family: var(--display);
+  font-size: clamp(1.05rem, 2.6vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.hero-tile--month .hero-tile__value { color: #c5e2ff; }
+.hero-tile--year .hero-tile__value { color: #ffc6e8; }
 
 .bday-line {
   display: block;
@@ -243,11 +272,10 @@ a:hover { text-decoration: underline; }
 }
 
 @media (max-width: 560px) {
-  .hero-meta-line {
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
-    gap: 0.25rem 0.4rem;
-  }
+  .hero-metrics { gap: 0.5rem; }
+  .hero-tile { padding: 0.7rem 0.45rem; }
+  .hero-tile__kicker { font-size: 0.62rem; letter-spacing: 0.08em; }
+  .hero-tile__value { font-size: 0.88rem; }
 }
 
 .pace-bar-wrap {

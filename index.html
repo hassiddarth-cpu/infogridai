@@ -35,11 +35,16 @@
       <p class="sprint-range" id="sprintRange">Aug 10 – Sep 30, 2026</p>
       <p class="sprint-today-hint">Selected day is below in Today · sprint window starts Aug 10</p>
 
-      <p class="hero-meta-line" aria-label="Time remaining">
-        <span class="meta-pair meta-pair--month">Month end · <b id="cdMonth">—</b></span>
-        <span class="meta-dot" aria-hidden="true">·</span>
-        <span class="meta-pair meta-pair--year">Year end · <b id="cdYear">—</b></span>
-      </p>
+      <div class="hero-metrics hero-metrics--time" aria-label="Time remaining">
+        <div class="hero-tile hero-tile--month">
+          <span class="hero-tile__kicker">Month end</span>
+          <strong class="hero-tile__value" id="cdMonth">—</strong>
+        </div>
+        <div class="hero-tile hero-tile--year">
+          <span class="hero-tile__kicker">Year end</span>
+          <strong class="hero-tile__value" id="cdYear">—</strong>
+        </div>
+      </div>
 
       <div class="progress-duo" aria-label="Sprint progress">
         <svg class="ring ring--varsha" viewBox="0 0 120 120" aria-hidden="true">
@@ -56,20 +61,34 @@
         </div>
       </div>
 
-      <p class="hero-meta-line hero-meta-line--below" aria-label="Daily status">
-        <span class="meta-pair">Today done by both · <b id="bothDone">Not yet</b></span>
-        <span class="meta-dot" aria-hidden="true">·</span>
-        <span class="meta-pair">Days logged · <b id="daysLogged">0</b></span>
-        <span class="meta-dot" aria-hidden="true">·</span>
-        <span class="meta-pair">Days left · <b id="daysLeft">—</b></span>
-      </p>
-      <p class="hero-meta-line hero-meta-line--soft" aria-label="Sprint metrics">
-        <span class="meta-pair">Calls · <b><span id="totalCalls">0</span>/<span id="callTarget">200</span></b></span>
-        <span class="meta-dot" aria-hidden="true">·</span>
-        <span class="meta-pair">Owner connects · <b id="meetingsBooked">0</b></span>
-        <span class="meta-dot" aria-hidden="true">·</span>
-        <span class="meta-pair">Team hours · <b id="teamHoursToday">0h 00m</b></span>
-      </p>
+      <div class="hero-metrics hero-metrics--daily" aria-label="Daily status">
+        <div class="hero-tile">
+          <span class="hero-tile__kicker">Today done by both</span>
+          <strong class="hero-tile__value" id="bothDone">Not yet</strong>
+        </div>
+        <div class="hero-tile">
+          <span class="hero-tile__kicker">Days logged</span>
+          <strong class="hero-tile__value" id="daysLogged">0</strong>
+        </div>
+        <div class="hero-tile">
+          <span class="hero-tile__kicker">Days left</span>
+          <strong class="hero-tile__value" id="daysLeft">—</strong>
+        </div>
+      </div>
+      <div class="hero-metrics hero-metrics--more" aria-label="Sprint metrics">
+        <div class="hero-tile">
+          <span class="hero-tile__kicker">Calls</span>
+          <strong class="hero-tile__value"><span id="totalCalls">0</span>/<span id="callTarget">200</span></strong>
+        </div>
+        <div class="hero-tile">
+          <span class="hero-tile__kicker">Owner connects</span>
+          <strong class="hero-tile__value" id="meetingsBooked">0</strong>
+        </div>
+        <div class="hero-tile">
+          <span class="hero-tile__kicker">Team hours</span>
+          <strong class="hero-tile__value" id="teamHoursToday">0h 00m</strong>
+        </div>
+      </div>
 
       <div class="pace-bar-wrap">
         <div class="pace-bar-top"><span>200-call pace</span><span id="callPct">0%</span></div>
