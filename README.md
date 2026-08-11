@@ -30,20 +30,17 @@ Read CURSOR-PROMPT.txt and do everything in it. Walk me through free Firebase + 
 
 (`SAY-THIS.txt` = short line · `CURSOR-PROMPT.txt` = full instructions)
 
-## Deploy (free forever — no credit card)
+## Deploy (free — no credit card)
 
-**Important:** Netlify Drop without an account dies after **1 hour**. That is not a paid wall — sign up free and **Claim this site**.
+**Public URL:** https://hassiddarth-cpu.github.io/infogridai/
 
-### Option A — Netlify (easiest)
-1. Go to [app.netlify.com/drop](https://app.netlify.com/drop)
-2. Drag the **whole folder** (`infogridai`), not only `index.html`
-3. Click **Claim this site** → **Sign up for free** (Starter plan — no payment)
-4. Bookmark the public URL (e.g. `https://something.netlify.app`)
-5. Connect Firebase in the app **Sync** tab (Spark / free)
+Hosted on **GitHub Pages** via `.github/workflows/pages.yml` (auto-deploy on push to `main`).
 
-### Option B — GitHub Pages (also free)
-1. Repo → **Settings** → **Pages** → Source: **Deploy from a branch**
-2. Branch: `main` / folder: `/ (root)` → Save
-3. URL: `https://hassiddarth-cpu.github.io/infogridai/` (if repo is public)
+`cloud-config.json` is in the repo so both devices auto-connect (**CLOUD LIVE**) from the public URL. Firebase web config is public-by-design.
 
-Sync still uses **Firebase Spark** (free). Hosting is only the public URL.
+### One-time (if Pages not live yet)
+1. Repo → **Settings** → **Pages**
+2. **Build and deployment → Source:** **GitHub Actions**
+3. Push to `main` (or re-run the **Deploy to GitHub Pages** workflow)
+
+Sync uses **Firebase Spark** (free). Netlify Drop is optional if your account works.

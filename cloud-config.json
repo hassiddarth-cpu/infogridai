@@ -1,0 +1,12 @@
+{
+  "vault": "infogrid-sprint",
+  "config": {
+    "apiKey": "AIzaSyDAbYdX8fElSQ3OhHcZ29Q0NdzP2l_NHUw",
+    "authDomain": "infogrid-dd53b.firebaseapp.com",
+    "databaseURL": "https://infogrid-dd53b-default-rtdb.firebaseio.com",
+    "projectId": "infogrid-dd53b",
+    "storageBucket": "infogrid-dd53b.firebasestorage.app",
+    "messagingSenderId": "834066056417",
+    "appId": "1:834066056417:web:b476008e42a0ab0560a3a0"
+  }
+}
