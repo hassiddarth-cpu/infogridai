@@ -500,6 +500,13 @@ function fmtTime(iso) {
   });
 }
 
+function fmtDateTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return `${keyFor(d)} ${fmtTime(iso)}`;
+}
+
 function fmtDuration(ms) {
   const total = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(total / 3600);
@@ -565,13 +572,19 @@ function tickCountdowns() {
 }
 
 function sessionMs(person, dayKey, now = Date.now()) {
-  const day = state.days[dayKey];
-  if (!day) return 0;
+  // Hours that fall on this calendar day (overnight sessions split at midnight)
+  const dayStart = startOfDay(parseKey(dayKey)).getTime();
+  const dayEnd = dayStart + 86400000;
   let ms = 0;
-  for (const s of day[person].sessions || []) {
-    const start = new Date(s.in).getTime();
-    const end = s.out ? new Date(s.out).getTime() : now;
-    if (Number.isFinite(start) && Number.isFinite(end) && end >= start) ms += end - start;
+  for (const k of Object.keys(state.days || {})) {
+    for (const s of state.days[k]?.[person]?.sessions || []) {
+      const start = new Date(s.in).getTime();
+      const end = s.out ? new Date(s.out).getTime() : now;
+      if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
+      const a = Math.max(start, dayStart);
+      const b = Math.min(end, dayEnd);
+      if (b > a) ms += b - a;
+    }
   }
   return ms;
 }
@@ -583,33 +596,19 @@ function sessionDurationMs(s, now = Date.now()) {
   return end - start;
 }
 
-function renderSessionLog(person, dayKey) {
-  const list = document.getElementById(`sessionLog-${person}`);
-  const sprintEl = document.getElementById(`sessionSprint-${person}`);
-  if (!list) return;
-  const sessions = ensureDay(dayKey)[person].sessions || [];
-  if (!sessions.length) {
-    list.innerHTML = `<li class="session-log__empty">No clock sessions yet for this day.</li>`;
-  } else {
-    list.innerHTML = sessions
-      .map((s, i) => {
-        const open = !s.out;
-        const dur = fmtDuration(sessionDurationMs(s));
-        const outCell = open
-          ? '<span class="live-tag">Live</span>'
-          : fmtTime(s.out);
-        return `<li class="session-log__row${open ? " is-live" : ""}">
-          <span class="session-log__idx">#${i + 1}</span>
-          <span class="session-log__in">${fmtTime(s.in)}</span>
-          <span class="session-log__out">${outCell}</span>
-          <span class="session-log__dur">${dur}</span>
-        </li>`;
-      })
-      .join("");
+/** Open shift anywhere (supports overnight across days). */
+function findOpenSession(person) {
+  let best = null;
+  for (const dayKey of Object.keys(state.days || {})) {
+    const sessions = state.days[dayKey]?.[person]?.sessions || [];
+    for (const s of sessions) {
+      if (s.out) continue;
+      if (!best || new Date(s.in).getTime() > new Date(best.session.in).getTime()) {
+        best = { dayKey, session: s };
+      }
+    }
   }
-  if (sprintEl) {
-    sprintEl.innerHTML = `Sprint total · <b>${fmtDuration(totalHoursSprint(person))}</b>`;
-  }
+  return best;
 }
 
 function openSession(person, dayKey) {
@@ -617,13 +616,60 @@ function openSession(person, dayKey) {
   return sessions.find((s) => !s.out) || null;
 }
 
+function renderSessionLog(person, dayKey) {
+  const list = document.getElementById(`sessionLog-${person}`);
+  const sprintEl = document.getElementById(`sessionSprint-${person}`);
+  if (!list) return;
+  const sessions = ensureDay(dayKey)[person].sessions || [];
+  const openFound = findOpenSession(person);
+  const rows = [];
+
+  if (openFound && openFound.dayKey !== dayKey) {
+    const s = openFound.session;
+    const open = !s.out;
+    rows.push(`<li class="session-log__row${open ? " is-live" : ""} session-log__row--carry">
+      <span class="session-log__idx">↺</span>
+      <span class="session-log__in" title="${fmtDateTime(s.in)}">${fmtDateTime(s.in)}</span>
+      <span class="session-log__out">${open ? '<span class="live-tag">Live · clock out anytime</span>' : fmtDateTime(s.out)}</span>
+      <span class="session-log__dur">${fmtDuration(sessionDurationMs(s))}</span>
+    </li>`);
+  }
+
+  if (!sessions.length && !rows.length) {
+    list.innerHTML = `<li class="session-log__empty">No clock sessions yet for this day.</li>`;
+  } else {
+    rows.push(
+      ...sessions.map((s, i) => {
+        const open = !s.out;
+        const inLabel = keyFor(new Date(s.in)) !== dayKey ? fmtDateTime(s.in) : fmtTime(s.in);
+        const outLabel = open
+          ? '<span class="live-tag">Live</span>'
+          : keyFor(new Date(s.out)) !== dayKey
+            ? fmtDateTime(s.out)
+            : fmtTime(s.out);
+        return `<li class="session-log__row${open ? " is-live" : ""}">
+          <span class="session-log__idx">#${i + 1}</span>
+          <span class="session-log__in" title="${fmtDateTime(s.in)}">${inLabel}</span>
+          <span class="session-log__out">${outLabel}</span>
+          <span class="session-log__dur">${fmtDuration(sessionDurationMs(s))}</span>
+        </li>`;
+      })
+    );
+    list.innerHTML = rows.join("");
+  }
+  if (sprintEl) {
+    sprintEl.innerHTML = `Sprint total · <b>${fmtDuration(totalHoursSprint(person))}</b>`;
+  }
+}
+
 function clockIn(person) {
-  const k = keyFor(selectedDate);
-  const day = ensureDay(k);
-  if (openSession(person, k)) {
-    alert("Already clocked in. Clock out first.");
+  if (findOpenSession(person)) {
+    alert("Already clocked in — including an overnight shift. Clock out first.");
     return;
   }
+  // Store on the calendar day of the clock-in moment (selected day if browsing history)
+  const k = keyFor(selectedDate);
+  const day = ensureDay(k);
   day[person].sessions.push({ id: uid(), in: new Date().toISOString(), out: null });
   persist();
   renderAll();
@@ -631,17 +677,18 @@ function clockIn(person) {
 }
 
 function clockOut(person) {
-  const k = keyFor(selectedDate);
-  ensureDay(k);
-  const open = openSession(person, k);
-  if (!open) {
+  const found = findOpenSession(person);
+  if (!found) {
     alert("Not clocked in.");
     return;
   }
-  open.out = new Date().toISOString();
+  found.session.out = new Date().toISOString();
   persist();
   renderAll();
-  els.jarvisLine.textContent = `${PEOPLE[person].name} clocked out · ${fmtDuration(sessionMs(person, k))}`;
+  const started = keyFor(new Date(found.session.in));
+  const ended = keyFor(new Date(found.session.out));
+  const overnight = started !== ended ? ` (overnight ${started} → ${ended})` : "";
+  els.jarvisLine.textContent = `${PEOPLE[person].name} clocked out · ${fmtDuration(sessionDurationMs(found.session))}${overnight}`;
 }
 
 function totalHoursForDay(dayKey) {
@@ -932,10 +979,12 @@ function renderPersonDay(person) {
 }
 
 function renderTimebox(person, dayKey) {
-  const open = openSession(person, dayKey);
+  const openFound = findOpenSession(person);
+  const open = openFound?.session || null;
+  const openDayKey = openFound?.dayKey || null;
   const sessions = ensureDay(dayKey)[person].sessions;
   const lastClosed = [...sessions].reverse().find((s) => s.out);
-  const firstIn = sessions[0]?.in || open?.in || null;
+  const firstIn = open?.in || sessions[0]?.in || null;
   const lastOut = open ? null : lastClosed?.out || null;
 
   const stateEl = document.getElementById(`sessionState-${person}`);
@@ -949,10 +998,21 @@ function renderTimebox(person, dayKey) {
 
   if (!stateEl) return;
 
-  stateEl.textContent = open ? "On shift · live" : sessions.length ? "Off shift" : "Off shift";
-  inEl.textContent = fmtTime(open?.in || firstIn);
+  if (open && openDayKey && openDayKey !== dayKey) {
+    stateEl.textContent = `On shift · since ${openDayKey}`;
+  } else if (open) {
+    stateEl.textContent = "On shift · live";
+  } else {
+    stateEl.textContent = "Off shift";
+  }
+  inEl.textContent = open
+    ? (openDayKey !== dayKey ? fmtDateTime(open.in) : fmtTime(open.in))
+    : fmtTime(firstIn);
   outEl.textContent = open ? "Live" : fmtTime(lastOut);
-  durEl.textContent = fmtDuration(sessionMs(person, dayKey));
+  // Live overnight: show full shift length; otherwise hours that land on this day
+  durEl.textContent = open
+    ? fmtDuration(sessionDurationMs(open))
+    : fmtDuration(sessionMs(person, dayKey));
   if (live) live.hidden = !open;
   if (box) box.classList.toggle("is-live", !!open);
   if (btnIn) btnIn.disabled = !!open;
@@ -2005,7 +2065,7 @@ function personDayStats(person, dayKey) {
   const openLeads = (state.callLists?.[person] || []).filter((l) => !l.stage).length;
   const staged = (state.callLists?.[person] || []).filter((l) => !!l.stage).length;
   const hours = sessionMs(person, dayKey);
-  const clocked = !!openSession(person, dayKey) || (day?.sessions || []).length > 0;
+  const clocked = !!findOpenSession(person) || (day?.sessions || []).length > 0;
   return { sales, skills, connects, openLeads, staged, hours, clocked, tasks: tasks.length };
 }
 
@@ -2435,19 +2495,17 @@ function excelRowsForPerson(personKey) {
       wrote = true;
     }
     for (const s of person.sessions || []) {
-      const start = new Date(s.in).getTime();
-      const end = s.out ? new Date(s.out).getTime() : Date.now();
-      const ms = Number.isFinite(start) && Number.isFinite(end) && end >= start ? end - start : 0;
+      const ms = sessionDurationMs(s);
       rows.push([
         dayKey,
         "session",
+        "hours",
+        s.out ? "Clock session" : "Clock session (open)",
         "",
         "",
         "",
-        "",
-        "",
-        fmtTime(s.in),
-        s.out ? fmtTime(s.out) : "open",
+        fmtDateTime(s.in),
+        s.out ? fmtDateTime(s.out) : "open",
         fmtDuration(ms),
         notes,
       ]);
@@ -2625,7 +2683,7 @@ document.getElementById("clearData").onclick = async () => {
     const k = keyFor(selectedDate);
     let live = false;
     for (const person of ["varsha", "siddharth"]) {
-      if (!openSession(person, k)) continue;
+      if (!findOpenSession(person)) continue;
       live = true;
       renderTimebox(person, k);
     }
