@@ -33,28 +33,7 @@
       <p class="sprint-range" id="sprintRange">Aug 10 – Sep 30, 2026</p>
       <p class="sprint-today-hint">Selected day is below in Today · sprint window starts Aug 10</p>
 
-      <section class="ai-coach" id="aiCoach" aria-label="Infogrid AI assistant">
-        <div class="ai-coach-head">
-          <div class="ai-avatar" aria-hidden="true">AI</div>
-          <div>
-            <h2>Infogrid Coach</h2>
-            <p class="ai-mood" id="coachMood">Scanning today’s effort…</p>
-          </div>
-        </div>
-        <p class="ai-flash" id="coachFlash" hidden></p>
-        <div class="ai-coach-grid">
-          <article class="ai-card ai-card--good">
-            <h3>Good news</h3>
-            <ul id="coachGood"></ul>
-          </article>
-          <article class="ai-card ai-card--bad">
-            <h3>Reality check</h3>
-            <ul id="coachBad"></ul>
-          </article>
-        </div>
-      </section>
-
-      <div class="countdown-row" aria-label="Countdowns">
+      <div class="countdown-row countdown-row--simple" aria-label="Countdowns">
         <div class="countdown">
           <span class="countdown-label">Month end</span>
           <strong class="countdown-value" id="cdMonth">—</strong>
@@ -62,14 +41,6 @@
         <div class="countdown">
           <span class="countdown-label">Year end</span>
           <strong class="countdown-value" id="cdYear">—</strong>
-        </div>
-        <div class="countdown countdown--varsha">
-          <span class="countdown-label">Varsha · Feb 21</span>
-          <strong class="countdown-value" id="cdVarshaBday">—</strong>
-        </div>
-        <div class="countdown countdown--sid">
-          <span class="countdown-label">Siddharth · Jan 27</span>
-          <strong class="countdown-value" id="cdSidBday">—</strong>
         </div>
       </div>
 
@@ -281,20 +252,29 @@
       </div>
       <div class="calendar" id="calendar"></div>
       <div class="month-summary" id="monthSummary"></div>
+      <div class="chart-grid">
+        <div class="glass-panel"><h3>Daily calls this month</h3><div id="monthDailyChart" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Varsha vs Siddharth</h3><div id="monthCompareChart" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Outcomes this month</h3><div id="monthOutcomeChart" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Hours this month</h3><div id="monthHoursChart" class="chart-host"></div></div>
+      </div>
     </section>
 
     <section class="view" id="view-logs" hidden>
       <div class="logs-head">
         <h2>Analytics</h2>
-        <p>Call pace, results, areas, hours.</p>
+        <p>Full sprint graphs · pace, outcomes, areas, hours, team.</p>
       </div>
       <div class="avg-board" id="avgBoard"></div>
       <div class="logs-kpis" id="logsKpis"></div>
-      <div class="logs-grid">
-        <div class="glass-panel"><h3>Monthly calls</h3><div id="monthlyCallsChart" class="bars"></div></div>
-        <div class="glass-panel"><h3>Call results</h3><div id="outcomesBreakdown" class="bars"></div></div>
-        <div class="glass-panel"><h3>By area</h3><div id="areaBreakdown" class="bars"></div></div>
-        <div class="glass-panel"><h3>Team</h3><div id="operatorCompare" class="bars"></div></div>
+      <div class="chart-grid chart-grid--analytics">
+        <div class="glass-panel wide"><h3>Call trend</h3><div id="monthlyCallsChart" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Outcomes mix</h3><div id="outcomesBreakdown" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Team scoreboard</h3><div id="operatorCompare" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>By area</h3><div id="areaBreakdown" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Hours by person</h3><div id="hoursChart" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Pace vs need</h3><div id="paceChart" class="chart-host"></div></div>
+        <div class="glass-panel wide"><h3>Stage funnel</h3><div id="funnelChart" class="chart-host"></div></div>
         <div class="glass-panel wide"><h3>Activity</h3><ul class="feed" id="activityFeed"></ul></div>
       </div>
     </section>
@@ -344,6 +324,11 @@
         </div>
         <p class="sync-hint" id="callImportHint">Stage values: owner connected, busy, voicemail, failed, gatekeeper. Changing stage logs a sales call for today.</p>
       </div>
+      <div class="chart-grid chart-grid--calling">
+        <div class="glass-panel"><h3>List progress</h3><div id="callingProgressChart" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Stages by person</h3><div id="callingStageChart" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Today’s dials</h3><div id="callingTodayChart" class="chart-host"></div></div>
+      </div>
       <div class="calling-filter">
         <button type="button" class="chip is-active" data-call-filter="all">All</button>
         <button type="button" class="chip" data-call-filter="open">Not called</button>
@@ -388,6 +373,35 @@
       <span class="sep">·</span>
       <span id="jarvisLine">Infogrid AI · Sprint Tracker</span>
     </footer>
+  </div>
+
+
+  <div class="coach-dock" id="coachDock">
+    <div class="coach-panel" id="aiCoach" hidden>
+      <div class="ai-coach-head">
+        <div class="ai-avatar" aria-hidden="true">AI</div>
+        <div>
+          <h2>Infogrid Coach</h2>
+          <p class="ai-mood" id="coachMood">Tap for brief…</p>
+        </div>
+        <button type="button" class="coach-close" id="coachClose" aria-label="Close">×</button>
+      </div>
+      <p class="ai-flash" id="coachFlash" hidden></p>
+      <div class="ai-coach-grid">
+        <article class="ai-card ai-card--good">
+          <h3>Good news</h3>
+          <ul id="coachGood"></ul>
+        </article>
+        <article class="ai-card ai-card--bad">
+          <h3>Reality check</h3>
+          <ul id="coachBad"></ul>
+        </article>
+      </div>
+    </div>
+    <button type="button" class="coach-fab" id="coachFab" aria-label="Open Infogrid Coach">
+      <span>AI</span>
+      <small>Coach</small>
+    </button>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>

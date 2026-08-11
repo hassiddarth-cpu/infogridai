@@ -526,16 +526,17 @@ function nextBirthday(month, day, from = new Date()) {
 
 function formatCountdown(target, now = new Date()) {
   const ms = target.getTime() - now.getTime();
-  if (ms <= 0) return "Now";
-  const totalSec = Math.floor(ms / 1000);
-  const days = Math.floor(totalSec / 86400);
-  const hours = Math.floor((totalSec % 86400) / 3600);
-  const mins = Math.floor((totalSec % 3600) / 60);
-  const secs = totalSec % 60;
-  if (days > 0) {
-    return `${days}d ${String(hours).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m`;
-  }
-  return `${String(hours).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m ${String(secs).padStart(2, "0")}s`;
+  if (ms <= 0) return "Done";
+  const days = Math.ceil(ms / 86400000);
+  if (days === 1) return "1 day left";
+  return `${days} days left`;
+}
+
+function formatBirthdayLine(target, now = new Date()) {
+  if (isSameCalendarDay(now, target)) return "Birthday today";
+  const days = Math.ceil((startOfDay(target) - startOfDay(now)) / 86400000);
+  if (days === 1) return "Birthday tomorrow";
+  return `Birthday in ${days} days`;
 }
 
 function isSameCalendarDay(a, b) {
@@ -551,23 +552,13 @@ function tickCountdowns() {
   if (els.cdMonth) els.cdMonth.textContent = formatCountdown(nextMonthEnd(now), now);
   if (els.cdYear) els.cdYear.textContent = formatCountdown(nextYearEnd(now), now);
 
-  for (const [person, elId, lineId] of [
-    ["varsha", "cdVarshaBday", "bdayLine-varsha"],
-    ["siddharth", "cdSidBday", "bdayLine-siddharth"],
-  ]) {
+  for (const person of ["varsha", "siddharth"]) {
     const { month, day } = PEOPLE[person].birthday;
     const next = nextBirthday(month, day, now);
-    const el = document.getElementById(elId);
-    const line = document.getElementById(lineId);
+    const line = document.getElementById(`bdayLine-${person}`);
+    if (!line) continue;
     const label = `${String(day).padStart(2, "0")} ${next.toLocaleString("en-GB", { month: "short" })}`;
-    if (isSameCalendarDay(now, next)) {
-      if (el) el.textContent = "Today!";
-      if (line) line.textContent = `Birthday ${label} · Today!`;
-    } else {
-      const text = formatCountdown(next, now);
-      if (el) el.textContent = text;
-      if (line) line.textContent = `Birthday ${label} · ${text}`;
-    }
+    line.textContent = `${label} · ${formatBirthdayLine(next, now)}`;
   }
 }
 
@@ -953,7 +944,8 @@ function renderMonth() {
     sSales = 0,
     vAds = 0,
     sAds = 0,
-    bothDays = 0;
+    bothDays = 0,
+    monthConnects = 0;
 
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(y, m, day);
@@ -976,6 +968,8 @@ function renderMonth() {
       sSales += dayData.siddharth.tasks.filter((t) => t.category === "sales").length;
       vAds += dayData.varsha.tasks.filter((t) => t.category === "ads").length;
       sAds += dayData.siddharth.tasks.filter((t) => t.category === "ads").length;
+      monthConnects += dayData.varsha.tasks.filter((t) => t.outcome === "connected").length;
+      monthConnects += dayData.siddharth.tasks.filter((t) => t.outcome === "connected").length;
       if (hasV && hasS) bothDays += 1;
     }
 
@@ -1007,7 +1001,166 @@ function renderMonth() {
     <div class="summary-card"><h3>Sales calls</h3><strong>${vSales + sSales}</strong></div>
     <div class="summary-card"><h3>Ad sessions</h3><strong>${vAds + sAds}</strong></div>
     <div class="summary-card"><h3>Days both logged</h3><strong>${bothDays}</strong></div>
+    <div class="summary-card"><h3>Owner connects</h3><strong>${monthConnects}</strong></div>
   `;
+
+  const dailyV = [];
+  const dailyS = [];
+  const outcomeMonth = { connected: 0, busy: 0, voicemail: 0, failed: 0, gatekeeper: 0 };
+  let hoursV = 0;
+  let hoursS = 0;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(y, m, day);
+    const k = keyFor(date);
+    const dayData = state.days[k];
+    const v = dayData ? dayData.varsha.tasks.filter((t) => t.category === "sales").length : 0;
+    const s = dayData ? dayData.siddharth.tasks.filter((t) => t.category === "sales").length : 0;
+    dailyV.push(v);
+    dailyS.push(s);
+    hoursV += sessionMs("varsha", k);
+    hoursS += sessionMs("siddharth", k);
+    if (dayData) {
+      for (const person of ["varsha", "siddharth"]) {
+        for (const t of dayData[person].tasks) {
+          if (t.outcome && outcomeMonth[t.outcome] != null) outcomeMonth[t.outcome] += 1;
+        }
+      }
+    }
+  }
+
+  const monthDaily = document.getElementById("monthDailyChart");
+  if (monthDaily) {
+    monthDaily.innerHTML = svgLineSeries([
+      { name: "Varsha", color: "#4aa3ff", points: dailyV },
+      { name: "Siddharth", color: "#ff5ec8", points: dailyS },
+    ]);
+  }
+  const monthCompare = document.getElementById("monthCompareChart");
+  if (monthCompare) {
+    monthCompare.innerHTML = svgDualBars([
+      { label: "Tasks", a: vTasks, b: sTasks },
+      { label: "Sales", a: vSales, b: sSales },
+      { label: "Ads", a: vAds, b: sAds },
+    ]);
+  }
+  const monthOutcome = document.getElementById("monthOutcomeChart");
+  if (monthOutcome) {
+    monthOutcome.innerHTML = svgDonut([
+      { label: "Connected", value: outcomeMonth.connected, color: "#3dd68c" },
+      { label: "Busy", value: outcomeMonth.busy, color: "#f5c542" },
+      { label: "Voicemail", value: outcomeMonth.voicemail, color: "#4aa3ff" },
+      { label: "Failed", value: outcomeMonth.failed, color: "#ff6b7a" },
+      { label: "Gatekeeper", value: outcomeMonth.gatekeeper, color: "#ff5ec8" },
+    ]);
+  }
+  const monthHours = document.getElementById("monthHoursChart");
+  if (monthHours) {
+    monthHours.innerHTML = svgDualBars([
+      {
+        label: "Hours",
+        a: Math.round(hoursV / 3600000 * 10) / 10,
+        b: Math.round(hoursS / 3600000 * 10) / 10,
+      },
+    ]);
+  }
+}
+
+
+// —— Chart helpers (SVG) ——
+function chartEmpty(msg = "No data yet") {
+  return `<div class="chart-empty">${escapeHtml(msg)}</div>`;
+}
+
+function svgDualBars(groups) {
+  // groups: [{ label, a, b }]
+  if (!groups.length) return chartEmpty();
+  const w = 360, h = 160, pad = 28, gap = 10;
+  const max = Math.max(1, ...groups.flatMap((g) => [g.a, g.b]));
+  const slot = (w - pad * 2) / groups.length;
+  const barW = Math.max(6, (slot - gap) / 2);
+  let bars = "";
+  groups.forEach((g, i) => {
+    const x0 = pad + i * slot;
+    const ha = (g.a / max) * (h - pad - 20);
+    const hb = (g.b / max) * (h - pad - 20);
+    bars += `<rect x="${x0}" y="${h - pad - ha}" width="${barW}" height="${ha}" rx="3" fill="#4aa3ff"/>`;
+    bars += `<rect x="${x0 + barW + 3}" y="${h - pad - hb}" width="${barW}" height="${hb}" rx="3" fill="#ff5ec8"/>`;
+    bars += `<text x="${x0 + barW}" y="${h - 8}" text-anchor="middle" fill="#93a0bb" font-size="9">${escapeHtml(g.label)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" role="img">${bars}
+    <text x="${pad}" y="14" fill="#4aa3ff" font-size="10">Varsha</text>
+    <text x="${pad + 52}" y="14" fill="#ff5ec8" font-size="10">Siddharth</text>
+  </svg>`;
+}
+
+function svgLineSeries(seriesList) {
+  // seriesList: [{ name, color, points: number[] }], labels optional via length
+  const points = seriesList[0]?.points || [];
+  if (!points.length) return chartEmpty();
+  const w = 420, h = 160, pad = 28;
+  const all = seriesList.flatMap((s) => s.points);
+  const max = Math.max(1, ...all);
+  const n = Math.max(...seriesList.map((s) => s.points.length));
+  const xAt = (i) => pad + (i / Math.max(1, n - 1)) * (w - pad * 2);
+  const yAt = (v) => h - pad - (v / max) * (h - pad - 16);
+  let paths = "";
+  seriesList.forEach((s) => {
+    const d = s.points.map((v, i) => `${i ? "L" : "M"}${xAt(i)},${yAt(v)}`).join(" ");
+    paths += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round"/>`;
+    s.points.forEach((v, i) => {
+      paths += `<circle cx="${xAt(i)}" cy="${yAt(v)}" r="3" fill="${s.color}"/>`;
+    });
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" role="img">${paths}</svg>`;
+}
+
+function svgDonut(segments) {
+  // [{ label, value, color }]
+  const total = segments.reduce((a, s) => a + s.value, 0);
+  if (!total) return chartEmpty();
+  const r = 46, cx = 70, cy = 70, circ = 2 * Math.PI * r;
+  let offset = 0;
+  const arcs = segments.map((s) => {
+    const len = (s.value / total) * circ;
+    const el = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="16"
+      stroke-dasharray="${len} ${circ - len}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})"/>`;
+    offset += len;
+    return el;
+  }).join("");
+  const legend = segments.map((s, i) =>
+    `<text x="150" y="${28 + i * 16}" fill="${s.color}" font-size="11">${escapeHtml(s.label)} · ${s.value}</text>`
+  ).join("");
+  return `<svg viewBox="0 0 300 140" role="img">${arcs}
+    <circle cx="${cx}" cy="${cy}" r="30" fill="#0a0e1c"/>
+    <text x="${cx}" y="${cy + 4}" text-anchor="middle" fill="#f2f5ff" font-size="14" font-weight="700">${total}</text>
+    ${legend}</svg>`;
+}
+
+function svgHBars(rows, color = "#4aa3ff") {
+  if (!rows.length) return chartEmpty();
+  const max = Math.max(1, ...rows.map((r) => r.value));
+  const rowH = 26;
+  const w = 360, h = rows.length * rowH + 10;
+  return `<svg viewBox="0 0 ${w} ${h}" role="img">${rows.map((r, i) => {
+    const y = i * rowH + 4;
+    const bw = Math.max(2, (r.value / max) * 200);
+    return `<text x="0" y="${y + 12}" fill="#93a0bb" font-size="10">${escapeHtml(r.label)}</text>
+      <rect x="110" y="${y}" width="${bw}" height="14" rx="4" fill="${r.color || color}"/>
+      <text x="${120 + bw}" y="${y + 12}" fill="#f2f5ff" font-size="10">${r.value}</text>`;
+  }).join("")}</svg>`;
+}
+
+function svgFunnel(steps) {
+  if (!steps.length) return chartEmpty();
+  const max = Math.max(1, ...steps.map((s) => s.value));
+  const w = 420, h = steps.length * 34 + 8;
+  return `<svg viewBox="0 0 ${w} ${h}" role="img">${steps.map((s, i) => {
+    const bw = 80 + (s.value / max) * 280;
+    const x = (w - bw) / 2;
+    const y = i * 34 + 4;
+    return `<rect x="${x}" y="${y}" width="${bw}" height="26" rx="8" fill="${s.color}"/>
+      <text x="${w / 2}" y="${y + 17}" text-anchor="middle" fill="#061018" font-size="11" font-weight="700">${escapeHtml(s.label)} · ${s.value}</text>`;
+  }).join("")}</svg>`;
 }
 
 function barRows(container, rows, green = false) {
@@ -1033,89 +1186,156 @@ function renderLogs() {
   const conversion = totalSales ? Math.round((booked / totalSales) * 100) : 0;
   const vShare = totalSales ? Math.round((vSales / totalSales) * 100) : 0;
   const sShare = totalSales ? Math.round((sSales / totalSales) * 100) : 0;
-  const gatekeepers = countOutcome("gatekeeper");
+  const busy = countOutcome("busy");
   const voicemails = countOutcome("voicemail");
+  const failed = countOutcome("failed");
+  const gatekeepers = countOutcome("gatekeeper");
+  const vHours = totalHoursSprint("varsha");
+  const sHours = totalHoursSprint("siddharth");
 
-  els.avgBoard.innerHTML = `
-    <div class="avg-card highlight">
-      <h3>Call pace to ${pace.target}</h3>
-      <strong>${pace.avgPerDay.toFixed(1)} <small>/ day actual</small></strong>
-      <p>Need <b>${pace.needPerDay.toFixed(1)}</b>/day · plan was <b>${pace.plannedPerDay.toFixed(1)}</b>/day · ${pace.left} days left</p>
-    </div>
-    <div class="avg-card">
-      <h3>Owner connect rate</h3>
-      <strong>${conversion}%</strong>
-      <p>${booked} owner connects from ${totalSales} cold calls</p>
-    </div>
-    <div class="avg-card">
-      <h3>Per person avg</h3>
-      <strong>${(pace.avgPerDay / 2).toFixed(1)} <small>/ day each</small></strong>
-      <p>Varsha ${vSales} · Siddharth ${sSales} · share ${vShare}% / ${sShare}%</p>
-    </div>
-    <div class="avg-card">
-      <h3>Hours worked (sprint)</h3>
-      <strong>${fmtDuration(totalHoursSprint())}</strong>
-      <p>Varsha ${fmtDuration(totalHoursSprint("varsha"))} · Sid ${fmtDuration(totalHoursSprint("siddharth"))}</p>
-    </div>
-  `;
+  if (els.avgBoard) {
+    els.avgBoard.innerHTML = `
+      <div class="avg-card highlight">
+        <h3>Call pace to ${pace.target}</h3>
+        <strong>${pace.avgPerDay.toFixed(1)} <small>/ day</small></strong>
+        <p>Need <b>${pace.needPerDay.toFixed(1)}</b>/day · ${pace.left} days left</p>
+      </div>
+      <div class="avg-card">
+        <h3>Owner connect rate</h3>
+        <strong>${conversion}%</strong>
+        <p>${booked} connects / ${totalSales} calls</p>
+      </div>
+      <div class="avg-card">
+        <h3>Share</h3>
+        <strong>${vShare}% / ${sShare}%</strong>
+        <p>Varsha ${vSales} · Siddharth ${sSales}</p>
+      </div>
+      <div class="avg-card">
+        <h3>Sprint hours</h3>
+        <strong>${fmtDuration(vHours + sHours)}</strong>
+        <p>V ${fmtDuration(vHours)} · S ${fmtDuration(sHours)}</p>
+      </div>
+    `;
+  }
 
-  els.logsKpis.innerHTML = `
-    <div class="kpi-card"><h3>Total cold calls</h3><strong>${totalSales}</strong></div>
-    <div class="kpi-card"><h3>Owner connected</h3><strong>${booked}</strong></div>
-    <div class="kpi-card"><h3>Busy</h3><strong>${countOutcome("busy")}</strong></div>
-    <div class="kpi-card"><h3>Voicemail</h3><strong>${voicemails}</strong></div>
-    <div class="kpi-card"><h3>Failed</h3><strong>${countOutcome("failed")}</strong></div>
-    <div class="kpi-card"><h3>Gatekeeper</h3><strong>${gatekeepers}</strong></div>
-  `;
+  if (els.logsKpis) {
+    els.logsKpis.innerHTML = `
+      <div class="kpi-card"><h3>Cold calls</h3><strong>${totalSales}</strong></div>
+      <div class="kpi-card"><h3>Connected</h3><strong>${booked}</strong></div>
+      <div class="kpi-card"><h3>Busy</h3><strong>${busy}</strong></div>
+      <div class="kpi-card"><h3>Voicemail</h3><strong>${voicemails}</strong></div>
+      <div class="kpi-card"><h3>Failed</h3><strong>${failed}</strong></div>
+      <div class="kpi-card"><h3>Gatekeeper</h3><strong>${gatekeepers}</strong></div>
+      <div class="kpi-card"><h3>Open leads</h3><strong>${(state.callLists?.varsha||[]).filter(l=>!l.stage).length + (state.callLists?.siddharth||[]).filter(l=>!l.stage).length}</strong></div>
+      <div class="kpi-card"><h3>Streak</h3><strong>${currentStreak()}</strong></div>
+    `;
+  }
 
-  const monthly = monthlySalesBreakdown();
-  const monthRows = Object.keys(monthly)
-    .sort((a, b) => new Date(a) - new Date(b))
-    .map((label) => ({ label, value: monthly[label].total }));
-  if (!monthRows.length) monthRows.push({ label: "No data", value: 0 });
-  barRows(els.monthlyCallsChart, monthRows);
+  const daily = dailySalesSeries(14);
+  const trendEl = els.monthlyCallsChart;
+  if (trendEl) {
+    trendEl.innerHTML = svgLineSeries([
+      { name: "Varsha", color: "#4aa3ff", points: daily.varsha },
+      { name: "Siddharth", color: "#ff5ec8", points: daily.siddharth },
+      { name: "Total", color: "#3dd68c", points: daily.total },
+    ]);
+  }
 
   const outcomes = outcomeCounts();
-  const outcomeRows = Object.keys(OUTCOME_LABELS).map((key) => ({
-    label: OUTCOME_LABELS[key],
-    value: outcomes[key] || 0,
-  }));
-  outcomeRows.push({ label: "Unspecified", value: outcomes.unspecified || 0 });
-  barRows(els.outcomesBreakdown, outcomeRows);
+  const donutEl = els.outcomesBreakdown;
+  if (donutEl) {
+    donutEl.innerHTML = svgDonut([
+      { label: "Connected", value: outcomes.connected || 0, color: "#3dd68c" },
+      { label: "Busy", value: outcomes.busy || 0, color: "#f5c542" },
+      { label: "Voicemail", value: outcomes.voicemail || 0, color: "#4aa3ff" },
+      { label: "Failed", value: outcomes.failed || 0, color: "#ff6b7a" },
+      { label: "Gatekeeper", value: outcomes.gatekeeper || 0, color: "#ff5ec8" },
+    ]);
+  }
+
+  const teamEl = els.operatorCompare;
+  if (teamEl) {
+    teamEl.innerHTML = svgDualBars([
+      { label: "Calls", a: vSales, b: sSales },
+      { label: "Owner", a: countOutcomePerson("varsha", "connected"), b: countOutcomePerson("siddharth", "connected") },
+      { label: "Skills", a: countCategory("varsha", "skill") + countCategory("varsha", "learning") + countCategory("varsha", "ads"), b: countCategory("siddharth", "skill") + countCategory("siddharth", "learning") + countCategory("siddharth", "ads") },
+    ]);
+  }
 
   const areas = areaCounts();
   const areaRows = Object.keys(areas)
     .sort((a, b) => areas[b] - areas[a])
-    .map((label) => ({ label, value: areas[label] }));
-  if (!areaRows.length) areaRows.push({ label: "No areas yet", value: 0 });
-  barRows(els.areaBreakdown, areaRows);
+    .slice(0, 8)
+    .map((label) => ({ label, value: areas[label], color: "#4aa3ff" }));
+  const areaEl = els.areaBreakdown;
+  if (areaEl) areaEl.innerHTML = svgHBars(areaRows.length ? areaRows : [{ label: "No areas", value: 0 }]);
 
-  barRows(
-    els.operatorCompare,
-    [
-      { label: "Varsha calls", value: vSales },
-      { label: "Sid calls", value: sSales },
-      { label: "Varsha owner", value: countOutcomePerson("varsha", "connected") },
-      { label: "Sid owner", value: countOutcomePerson("siddharth", "connected") },
-    ],
-    true
-  );
+  const hoursEl = document.getElementById("hoursChart");
+  if (hoursEl) {
+    hoursEl.innerHTML = svgDualBars([
+      { label: "Hours", a: Math.round(vHours / 3600000 * 10) / 10, b: Math.round(sHours / 3600000 * 10) / 10 },
+    ]);
+  }
+
+  const paceEl = document.getElementById("paceChart");
+  if (paceEl) {
+    paceEl.innerHTML = svgHBars([
+      { label: "Actual/day", value: Math.round(pace.avgPerDay * 10) / 10, color: "#3dd68c" },
+      { label: "Need/day", value: Math.round(pace.needPerDay * 10) / 10, color: "#f5c542" },
+      { label: "Plan/day", value: Math.round(pace.plannedPerDay * 10) / 10, color: "#4aa3ff" },
+      { label: "Total calls", value: totalSales, color: "#ff5ec8" },
+    ]);
+  }
+
+  const funnelEl = document.getElementById("funnelChart");
+  if (funnelEl) {
+    const openLeads =
+      (state.callLists?.varsha || []).filter((l) => !l.stage).length +
+      (state.callLists?.siddharth || []).filter((l) => !l.stage).length;
+    funnelEl.innerHTML = svgFunnel([
+      { label: "Open leads", value: openLeads, color: "#93a0bb" },
+      { label: "Calls logged", value: totalSales, color: "#4aa3ff" },
+      { label: "Gatekeeper", value: gatekeepers, color: "#ff5ec8" },
+      { label: "Owner connected", value: booked, color: "#3dd68c" },
+    ]);
+  }
 
   const feed = allActivity();
-  els.activityFeed.innerHTML = feed.length
-    ? feed
-        .map((item) => {
-          const who = PEOPLE[item.person].name;
-          const out = item.outcome ? ` · ${OUTCOME_LABELS[item.outcome] || item.outcome}` : "";
-          const area = item.area ? ` · ${item.area}` : "";
-          return `<li>
-            <span class="when">${item.date}</span>
-            <span class="who${item.person === "siddharth" ? " sid" : ""}">${who}</span>
-            <span>${item.title} <small style="color:var(--muted)">(${item.category}${out}${area})</small></span>
-          </li>`;
-        })
-        .join("")
-    : `<li><span class="when">—</span><span class="who">System</span><span>No activity logged yet.</span></li>`;
+  if (els.activityFeed) {
+    els.activityFeed.innerHTML = feed.length
+      ? feed
+          .map((item) => {
+            const who = PEOPLE[item.person].name;
+            const out = item.outcome ? ` · ${OUTCOME_LABELS[item.outcome] || item.outcome}` : "";
+            const area = item.area ? ` · ${item.area}` : "";
+            return `<li>
+              <span class="when">${item.date}</span>
+              <span class="who${item.person === "siddharth" ? " sid" : ""}">${who}</span>
+              <span>${item.title} <small style="color:var(--muted)">(${item.category}${out}${area})</small></span>
+            </li>`;
+          })
+          .join("")
+      : `<li><span class="when">—</span><span class="who">System</span><span>No activity logged yet.</span></li>`;
+  }
+}
+
+function dailySalesSeries(days = 14) {
+  const varsha = [];
+  const siddharth = [];
+  const total = [];
+  const end = startOfDay(new Date());
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(end);
+    d.setDate(end.getDate() - i);
+    const k = keyFor(d);
+    const day = state.days[k];
+    const v = day ? day.varsha.tasks.filter((t) => t.category === "sales").length : 0;
+    const s = day ? day.siddharth.tasks.filter((t) => t.category === "sales").length : 0;
+    varsha.push(v);
+    siddharth.push(s);
+    total.push(v + s);
+  }
+  return { varsha, siddharth, total };
 }
 
 function renderGoals() {
@@ -1355,6 +1575,7 @@ function applyCallLists(incoming, append) {
   }
   persist();
   renderAll();
+  coachAfterSheetUpload(incoming);
 }
 
 function setLeadStage(person, leadId, stage) {
@@ -1444,6 +1665,39 @@ function renderCalling() {
       listEl.appendChild(card);
     }
   }
+
+  const vList = state.callLists.varsha || [];
+  const sList = state.callLists.siddharth || [];
+  const stageKeys = ["connected", "busy", "voicemail", "failed", "gatekeeper"];
+  const progressEl = document.getElementById("callingProgressChart");
+  if (progressEl) {
+    progressEl.innerHTML = svgDualBars([
+      { label: "Total", a: vList.length, b: sList.length },
+      { label: "Open", a: vList.filter((l) => !l.stage).length, b: sList.filter((l) => !l.stage).length },
+      { label: "Done", a: vList.filter((l) => !!l.stage).length, b: sList.filter((l) => !!l.stage).length },
+    ]);
+  }
+  const stageEl = document.getElementById("callingStageChart");
+  if (stageEl) {
+    stageEl.innerHTML = svgDualBars(
+      stageKeys.map((key) => ({
+        label: OUTCOME_LABELS[key].split(" ")[0],
+        a: vList.filter((l) => l.stage === key).length,
+        b: sList.filter((l) => l.stage === key).length,
+      }))
+    );
+  }
+  const todayEl = document.getElementById("callingTodayChart");
+  if (todayEl) {
+    const todayKey = keyFor(startOfDay(new Date()));
+    const v = personDayStats("varsha", todayKey);
+    const s = personDayStats("siddharth", todayKey);
+    todayEl.innerHTML = svgDualBars([
+      { label: "Calls", a: v.sales, b: s.sales },
+      { label: "Owner", a: v.connects, b: s.connects },
+      { label: "Skills", a: v.skills, b: s.skills },
+    ]);
+  }
 }
 
 function downloadCallTemplate() {
@@ -1490,11 +1744,66 @@ function exportCallListsExcel() {
 }
 
 
+function setCoachOpen(open) {
+  const panel = document.getElementById("aiCoach");
+  const fab = document.getElementById("coachFab");
+  if (!panel) return;
+  panel.hidden = !open;
+  if (fab) fab.classList.toggle("is-open", !!open);
+}
+
 function celebrate(message, kind = "good") {
   coachFlash = { message, kind };
-  coachFlashUntil = Date.now() + 14000;
+  coachFlashUntil = Date.now() + 16000;
   if (els.jarvisLine) els.jarvisLine.textContent = message;
+  setCoachOpen(true);
   renderCoach();
+}
+
+function dayWinnerMessage() {
+  const todayKey = keyFor(startOfDay(new Date()));
+  const v = personDayStats("varsha", todayKey);
+  const s = personDayStats("siddharth", todayKey);
+  const vScore = v.sales * 2 + v.connects * 3 + v.skills + (v.clocked ? 1 : 0);
+  const sScore = s.sales * 2 + s.connects * 3 + s.skills + (s.clocked ? 1 : 0);
+  if (vScore === 0 && sScore === 0) {
+    return "Nobody is ahead yet today — first dials or skills win the board.";
+  }
+  if (vScore === sScore) {
+    return `Tie day: Varsha and Siddharth are even (score ${vScore}). Best of luck pulling ahead.`;
+  }
+  if (vScore > sScore) {
+    return `Day leader: Varsha (score ${vScore} vs ${sScore}). Congrats — best of luck keeping the lead.`;
+  }
+  return `Day leader: Siddharth (score ${sScore} vs ${vScore}). Congrats — best of luck keeping the lead.`;
+}
+
+function coachAfterSheetUpload(incoming) {
+  const v = incoming.varsha || [];
+  const s = incoming.siddharth || [];
+  const vDone = v.filter((l) => l.stage).length;
+  const sDone = s.filter((l) => l.stage).length;
+  const vConn = v.filter((l) => l.stage === "connected").length;
+  const sConn = s.filter((l) => l.stage === "connected").length;
+  const parts = [
+    `Sheet loaded · Varsha ${v.length} leads (${vDone} staged) · Siddharth ${s.length} leads (${sDone} staged).`,
+  ];
+  if (vDone || sDone) {
+    if (vDone > sDone) {
+      parts.push(`Congrats Varsha — more completed stages on this upload (${vDone} vs ${sDone}). Best of luck clearing the rest.`);
+    } else if (sDone > vDone) {
+      parts.push(`Congrats Siddharth — more completed stages on this upload (${sDone} vs ${vDone}). Best of luck clearing the rest.`);
+    } else {
+      parts.push(`Nice — both completed ${vDone} staged lead(s) on this sheet. Best of luck finishing open rows.`);
+    }
+  } else {
+    parts.push("Fresh list with no stages yet — dial and update stages to earn congratulations.");
+  }
+  if (vConn || sConn) {
+    parts.push(`Owner connects in sheet: Varsha ${vConn} · Siddharth ${sConn}.`);
+  }
+  parts.push(dayWinnerMessage());
+  celebrate(parts.join(" "), "good");
 }
 
 function personDayStats(person, dayKey) {
@@ -1919,6 +2228,14 @@ function downloadExcel() {
 }
 
 document.getElementById("exportExcel").onclick = () => downloadExcel();
+
+document.getElementById("coachFab")?.addEventListener("click", () => {
+  const panel = document.getElementById("aiCoach");
+  const willOpen = !panel || panel.hidden;
+  setCoachOpen(willOpen);
+  if (willOpen) renderCoach();
+});
+document.getElementById("coachClose")?.addEventListener("click", () => setCoachOpen(false));
 
 document.getElementById("downloadCallTemplate").onclick = () => downloadCallTemplate();
 document.getElementById("exportCallLists").onclick = () => exportCallListsExcel();
