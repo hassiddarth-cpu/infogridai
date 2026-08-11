@@ -159,59 +159,71 @@ a:hover { text-decoration: underline; }
   letter-spacing: 0.02em;
 }
 
+.hero-metrics {
+  width: min(560px, 100%);
+  margin: 0 auto 0.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
 .countdown-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
-  margin: 0 auto 1.35rem;
-  max-width: 440px;
+  margin: 0 0 1.25rem;
   width: 100%;
+  max-width: none;
 }
 .countdown-row--focus .countdown {
-  padding: 0.95rem 1rem 1.05rem;
-  border-radius: 20px;
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
   border: 1px solid rgba(255,255,255,0.12);
-  background:
-    linear-gradient(165deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.04);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
   text-align: center;
   position: relative;
   overflow: hidden;
+  min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .countdown-row--focus .countdown::before {
   content: "";
   position: absolute;
-  inset: 0 auto 0 0;
+  left: 0; top: 12px; bottom: 12px;
   width: 3px;
-  border-radius: 20px 0 0 20px;
+  border-radius: 3px;
 }
 .countdown--month::before { background: var(--varsha); }
 .countdown--year::before { background: var(--sid); }
 .countdown--month {
-  border-color: rgba(74, 163, 255, 0.28);
-  background: linear-gradient(165deg, rgba(74,163,255,0.14), rgba(255,255,255,0.02));
+  border-color: rgba(74, 163, 255, 0.3);
+  background: linear-gradient(160deg, rgba(74,163,255,0.16), rgba(255,255,255,0.03));
 }
 .countdown--year {
-  border-color: rgba(255, 94, 200, 0.28);
-  background: linear-gradient(165deg, rgba(255,94,200,0.12), rgba(255,255,255,0.02));
+  border-color: rgba(255, 94, 200, 0.3);
+  background: linear-gradient(160deg, rgba(255,94,200,0.14), rgba(255,255,255,0.03));
 }
 .countdown-label {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
 }
 .countdown-value {
   display: block;
   font-family: var(--display);
-  font-size: clamp(1.15rem, 3.5vw, 1.45rem);
+  font-size: clamp(1.2rem, 3.2vw, 1.5rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
-  line-height: 1.15;
+  line-height: 1.1;
   color: #fff;
 }
 .countdown--month .countdown-value { color: #9fd0ff; }
@@ -228,7 +240,10 @@ a:hover { text-decoration: underline; }
 .person--sid .bday-line { color: rgba(255, 94, 200, 0.9); }
 
 .progress-duo {
-  position: relative; width: 148px; height: 148px; margin: 0 auto 1.35rem;
+  position: relative;
+  width: 148px;
+  height: 148px;
+  margin: 0.15rem auto 1.35rem;
   filter: drop-shadow(0 0 24px rgba(74, 163, 255, 0.15));
 }
 .ring { position: absolute; inset: 0; transform: rotate(-90deg); }
@@ -259,38 +274,42 @@ a:hover { text-decoration: underline; }
 }
 
 .stat-row {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.55rem; margin-bottom: 0.75rem;
+  display: grid;
+  gap: 0.65rem;
+  width: 100%;
+  margin: 0 0 0.65rem;
 }
 .stat-row--primary {
-  margin-bottom: 0.55rem;
-  gap: 0.65rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 0.7rem;
 }
 .stat-row--secondary {
-  margin-bottom: 1.15rem;
-  opacity: 0.95;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1.2rem;
 }
 .stat {
-  display: flex; flex-direction: column; gap: 0.25rem;
-  padding: 0.75rem 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.8rem 0.7rem;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(255,255,255,0.035);
   backdrop-filter: blur(12px);
-  min-width: 128px;
+  min-width: 0;
   text-align: center;
   transition: transform 0.25s var(--ease), border-color 0.25s, background 0.25s;
 }
 .stat--focus {
-  min-width: 148px;
-  padding: 0.9rem 1.15rem;
-  border-radius: 20px;
+  padding: 0.95rem 0.75rem;
+  border-radius: 18px;
   border-color: rgba(255,255,255,0.14);
-  background: linear-gradient(165deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
-  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  background: linear-gradient(165deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
+  box-shadow: 0 8px 24px rgba(0,0,0,0.16);
 }
 .stat--focus .stat-value {
   font-family: var(--display);
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: -0.03em;
 }
@@ -300,14 +319,22 @@ a:hover { text-decoration: underline; }
   background: rgba(255,255,255,0.06);
 }
 .stat-label {
-  font-size: 0.65rem; color: var(--muted); text-transform: uppercase;
-  letter-spacing: 0.06em; font-weight: 600;
+  font-size: 0.62rem; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.05em; font-weight: 600;
+  line-height: 1.25;
 }
-.stat-value { font-weight: 700; font-size: 0.95rem; letter-spacing: -0.02em; }
+.stat-value {
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+  word-break: break-word;
+}
 
 @media (max-width: 640px) {
-  .stat-row--primary { display: grid; grid-template-columns: 1fr; max-width: 320px; margin-left: auto; margin-right: auto; }
-  .stat--focus { min-width: 0; width: 100%; }
+  .stat-row--primary,
+  .stat-row--secondary {
+    grid-template-columns: 1fr;
+  }
 }
 
 .pace-bar-wrap {
