@@ -467,49 +467,207 @@ a:hover { text-decoration: underline; }
 .btn-in:hover:not(:disabled), .btn-out:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); }
 .btn-in:disabled, .btn-out:disabled { opacity: 0.4; cursor: not-allowed; transform: none; filter: none; }
 
+.log-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.03);
+}
+.log-panel__hint {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
 .quick-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .quick-actions button {
   border: 1px solid var(--line); background: rgba(255,255,255,0.03);
-  border-radius: 999px; padding: 0.42rem 0.75rem; font-size: 0.8rem;
-  font-weight: 600; cursor: pointer; transition: 0.2s var(--ease);
+  border-radius: 999px; padding: 0.5rem 0.85rem; font-size: 0.8rem;
+  font-weight: 650; cursor: pointer; transition: 0.2s var(--ease);
 }
-.person--varsha .quick-actions button:hover {
+.quick-actions button.is-active {
+  border-color: rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.08);
+}
+.person--varsha .quick-actions button:hover,
+.person--varsha .quick-actions button.is-active {
   border-color: rgba(74,163,255,0.55); background: var(--varsha-soft);
-  color: #9ccfff; transform: translateY(-1px);
+  color: #9ccfff;
 }
-.person--sid .quick-actions button:hover {
+.person--sid .quick-actions button:hover,
+.person--sid .quick-actions button.is-active {
   border-color: rgba(255,94,200,0.55); background: var(--sid-soft);
-  color: #ffb3e0; transform: translateY(-1px);
+  color: #ffb3e0;
+}
+
+.call-logger {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.25);
+}
+.call-logger[hidden] { display: none !important; }
+.call-logger__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.call-logger__top strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+.linkish {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+}
+.linkish:hover { color: var(--text); }
+.outcome-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.outcome-chips button {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: 0.18s var(--ease);
+}
+.outcome-chips button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.08);
+}
+.outcome-chips button[data-outcome="connected"] {
+  border-color: rgba(61,214,140,0.35);
+  background: rgba(61,214,140,0.1);
+}
+.outcome-chips button[data-outcome="connected"]:hover {
+  border-color: rgba(61,214,140,0.6);
+  background: rgba(61,214,140,0.18);
+}
+.call-area {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.35);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+  color: inherit;
+  outline: none;
 }
 
 .task-form {
-  display: grid; grid-template-columns: 1.2fr 0.7fr 0.95fr 0.7fr auto; gap: 0.4rem;
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 0.55rem 0.5rem;
+  align-items: end;
 }
+.task-form[hidden] { display: none !important; }
+.task-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  min-width: 0;
+}
+.task-form__field--title { grid-column: 1 / -1; }
+.task-form__label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.task-form__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+.task-form .ghost {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.task-form[data-mode="ads"] .task-form__field--cat,
+.task-form[data-mode="skill"] .task-form__field--cat,
+.task-form[data-mode="ads"] .task-form__field--outcome,
+.task-form[data-mode="skill"] .task-form__field--outcome,
+.task-form[data-mode="ads"] .task-form__field--area,
+.task-form[data-mode="skill"] .task-form__field--area {
+  display: none;
+}
+.task-form:not([data-mode="custom"]):not([data-mode="sales"]) .task-form__field--outcome,
+.task-form:not([data-mode="custom"]):not([data-mode="sales"]) .task-form__field--area {
+  display: none;
+}
+.task-form[data-mode="custom"] .task-form__field--outcome,
+.task-form[data-mode="custom"] .task-form__field--area {
+  display: none;
+}
+.task-form[data-mode="custom"].is-sales .task-form__field--outcome,
+.task-form[data-mode="custom"].is-sales .task-form__field--area {
+  display: flex;
+}
+.task-form.is-error .task-form__field--outcome select,
+.task-form.is-error input[name="title"] {
+  border-color: rgba(255,107,122,0.55);
+  box-shadow: 0 0 0 3px rgba(255,107,122,0.12);
+}
+.log-flash {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #3dd68c;
+}
+.log-flash[hidden] { display: none !important; }
+
 @media (max-width: 720px) {
-  .task-form { grid-template-columns: 1fr 1fr; }
-  .task-form input[name="title"], .task-form button { grid-column: 1 / -1; }
+  .task-form { grid-template-columns: 1fr; }
 }
 
 .task-form input, .task-form select, .goal-form input, .goal-form select,
-.notes textarea, .sync-form input, .sync-form textarea {
+.notes textarea, .sync-form input, .sync-form textarea, .call-area {
   border: 1px solid var(--line); background: rgba(0,0,0,0.35);
   border-radius: var(--radius-sm); padding: 0.65rem 0.8rem; outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
+  color: inherit;
+  font: inherit;
 }
 .task-form input:focus, .task-form select:focus, .notes textarea:focus,
-.sync-form input:focus, .sync-form textarea:focus {
+.sync-form input:focus, .sync-form textarea:focus, .call-area:focus {
   border-color: rgba(74,163,255,0.45);
   box-shadow: 0 0 0 3px rgba(74,163,255,0.12);
 }
-.task-form button, .goal-form button, .sync-actions button[type="submit"], .gate-primary {
+.task-form button[type="submit"], .goal-form button, .sync-actions button[type="submit"], .gate-primary {
   border: 0; border-radius: var(--radius-sm); padding: 0.65rem 1rem;
   font-weight: 700; cursor: pointer; transition: 0.2s var(--ease);
 }
-.person--varsha .task-form button {
+.person--varsha .task-form button[type="submit"] {
   background: var(--varsha); color: #041018;
   box-shadow: 0 8px 22px rgba(74,163,255,0.3);
 }
-.person--sid .task-form button {
+.person--sid .task-form button[type="submit"] {
   background: var(--sid); color: #180410;
   box-shadow: 0 8px 22px rgba(255,94,200,0.28);
 }
@@ -517,7 +675,7 @@ a:hover { text-decoration: underline; }
   background: linear-gradient(135deg, var(--varsha), var(--sid)); color: #0a0e18;
   box-shadow: 0 10px 28px rgba(74,163,255,0.25);
 }
-.task-form button:hover, .goal-form button:hover,
+.task-form button[type="submit"]:hover, .goal-form button:hover,
 .sync-actions button[type="submit"]:hover, .gate-primary:hover {
   transform: translateY(-1px); filter: brightness(1.06);
 }

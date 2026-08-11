@@ -2122,43 +2122,116 @@ function addTask(person, title, category, outcome = "", area = "") {
 }
 
 document.querySelectorAll(".task-form").forEach((form) => {
+  const panel = form.closest(".log-panel");
+  const syncSalesFields = () => {
+    const isSales = form.category.value === "sales";
+    form.classList.toggle("is-sales", isSales);
+  };
+  form.category?.addEventListener("change", syncSalesFields);
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    addTask(
-      form.dataset.person,
-      form.title.value,
-      form.category.value,
-      form.outcome.value,
-      form.area.value
-    );
-    form.reset();
-    form.category.value = "sales";
-    form.title.focus();
+    form.classList.remove("is-error");
+    const title = form.title.value.trim();
+    const category = form.category.value;
+    const outcome = form.outcome.value;
+    const area = form.area.value;
+    if (!title) {
+      form.classList.add("is-error");
+      form.title.focus();
+      return;
+    }
+    if (category === "sales" && !outcome) {
+      form.classList.add("is-error");
+      form.outcome.focus();
+      return;
+    }
+    addTask(form.dataset.person, title, category, outcome, area);
+    resetLogPanel(panel);
+    flashLogSaved(panel);
   });
 });
 
-document.querySelectorAll(".person").forEach((card) => {
-  const person = card.dataset.person;
-  card.querySelectorAll(".quick-actions button").forEach((btn) => {
+function flashLogSaved(panel) {
+  const flash = panel?.querySelector(".log-flash");
+  if (!flash) return;
+  flash.hidden = false;
+  flash.textContent = "Saved ✓";
+  clearTimeout(flashLogSaved._t);
+  flashLogSaved._t = setTimeout(() => {
+    flash.hidden = true;
+  }, 1600);
+}
+
+function resetLogPanel(panel) {
+  if (!panel) return;
+  const form = panel.querySelector(".task-form");
+  const callLogger = panel.querySelector(".call-logger");
+  const area = panel.querySelector(".call-area");
+  panel.querySelectorAll(".quick-actions button").forEach((b) => b.classList.remove("is-active"));
+  if (callLogger) callLogger.hidden = true;
+  if (area) area.value = "";
+  if (form) {
+    form.hidden = true;
+    form.reset();
+    form.dataset.mode = "idle";
+    form.classList.remove("is-error", "is-sales");
+    form.category.value = "sales";
+  }
+}
+
+function openLogMode(panel, mode) {
+  const form = panel.querySelector(".task-form");
+  const callLogger = panel.querySelector(".call-logger");
+  const label = form?.querySelector("[data-label]");
+  panel.querySelectorAll(".quick-actions button").forEach((b) => {
+    b.classList.toggle("is-active", b.dataset.cat === mode);
+  });
+  if (mode === "sales") {
+    form.hidden = true;
+    callLogger.hidden = false;
+    callLogger.querySelector(".outcome-chips button")?.focus();
+    return;
+  }
+  callLogger.hidden = true;
+  form.hidden = false;
+  form.dataset.mode = mode;
+  form.classList.remove("is-error", "is-sales");
+  if (mode === "ads") {
+    form.category.value = "ads";
+    if (label) label.textContent = "What ad learning?";
+    form.title.placeholder = "e.g. Meta ads targeting basics";
+    form.title.value = "";
+  } else if (mode === "skill") {
+    form.category.value = "skill";
+    if (label) label.textContent = "What skill did you learn?";
+    form.title.placeholder = "e.g. Objection handling";
+    form.title.value = "";
+  } else {
+    form.category.value = "other";
+    if (label) label.textContent = "What did you do?";
+    form.title.placeholder = "Type the task…";
+    form.title.value = "";
+    form.classList.toggle("is-sales", form.category.value === "sales");
+  }
+  form.title.focus();
+}
+
+document.querySelectorAll(".log-panel").forEach((panel) => {
+  const person = panel.dataset.log;
+  panel.querySelectorAll(".quick-actions button").forEach((btn) => {
+    btn.addEventListener("click", () => openLogMode(panel, btn.dataset.cat));
+  });
+  panel.querySelectorAll(".log-cancel").forEach((btn) => {
+    btn.addEventListener("click", () => resetLogPanel(panel));
+  });
+  panel.querySelectorAll(".outcome-chips button").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const cat = btn.dataset.cat;
-      if (cat === "custom") {
-        card.querySelector(".task-form").title.focus();
-        return;
-      }
-      if (cat === "sales") {
-        const form = card.querySelector(".task-form");
-        form.category.value = "sales";
-        form.title.value = btn.dataset.quick || "Cold call";
-        form.outcome.focus();
-        return;
-      }
-      if (cat === "skill") {
-        const skill = prompt(`What skill did ${PEOPLE[person].name} add?`, btn.dataset.quick || "");
-        if (skill && skill.trim()) addTask(person, skill.trim(), "skill");
-        return;
-      }
-      addTask(person, btn.dataset.quick, cat);
+      const outcome = btn.dataset.outcome;
+      const area = panel.querySelector(".call-area")?.value || "";
+      addTask(person, "Cold call", "sales", outcome, area);
+      resetLogPanel(panel);
+      flashLogSaved(panel);
     });
   });
 });
