@@ -35,15 +35,15 @@
       <p class="sprint-range" id="sprintRange">Aug 10 – Sep 30, 2026</p>
       <p class="sprint-today-hint">Selected day is below in Today · sprint window starts Aug 10</p>
 
-      <div class="hero-metrics">
-      <div class="countdown-row countdown-row--focus" aria-label="Time remaining">
-        <div class="countdown countdown--month">
-          <span class="countdown-label">Month end</span>
-          <strong class="countdown-value" id="cdMonth">—</strong>
+      <div class="time-strip" aria-label="Time remaining">
+        <div class="time-cell time-cell--month">
+          <span class="time-kicker">Month end</span>
+          <strong class="time-value" id="cdMonth">—</strong>
         </div>
-        <div class="countdown countdown--year">
-          <span class="countdown-label">Year end</span>
-          <strong class="countdown-value" id="cdYear">—</strong>
+        <div class="time-divider" aria-hidden="true"></div>
+        <div class="time-cell time-cell--year">
+          <span class="time-kicker">Year end</span>
+          <strong class="time-value" id="cdYear">—</strong>
         </div>
       </div>
 
@@ -62,16 +62,35 @@
         </div>
       </div>
 
-      <div class="stat-row stat-row--primary" aria-label="Daily status">
-        <div class="stat stat--focus"><span class="stat-label">Today done by both</span><span class="stat-value" id="bothDone">Not yet</span></div>
-        <div class="stat stat--focus"><span class="stat-label">Days logged</span><span class="stat-value" id="daysLogged">0</span></div>
-        <div class="stat stat--focus"><span class="stat-label">Days left</span><span class="stat-value" id="daysLeft">—</span></div>
-      </div>
-      <div class="stat-row stat-row--secondary" aria-label="Sprint metrics">
-        <div class="stat"><span class="stat-label">Calls</span><span class="stat-value"><span id="totalCalls">0</span>/<span id="callTarget">200</span></span></div>
-        <div class="stat"><span class="stat-label">Owner connects</span><span class="stat-value" id="meetingsBooked">0</span></div>
-        <div class="stat"><span class="stat-label">Team hours</span><span class="stat-value" id="teamHoursToday">0h 00m</span></div>
-      </div>
+      <div class="metric-board">
+        <div class="metric-board__row metric-board__row--main" aria-label="Daily status">
+          <div class="metric">
+            <span class="metric-label">Today done by both</span>
+            <span class="metric-value" id="bothDone">Not yet</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Days logged</span>
+            <span class="metric-value" id="daysLogged">0</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Days left</span>
+            <span class="metric-value" id="daysLeft">—</span>
+          </div>
+        </div>
+        <div class="metric-board__row metric-board__row--sub" aria-label="Sprint metrics">
+          <div class="metric">
+            <span class="metric-label">Calls</span>
+            <span class="metric-value"><span id="totalCalls">0</span>/<span id="callTarget">200</span></span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Owner connects</span>
+            <span class="metric-value" id="meetingsBooked">0</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Team hours</span>
+            <span class="metric-value" id="teamHoursToday">0h 00m</span>
+          </div>
+        </div>
       </div>
 
       <div class="pace-bar-wrap">
