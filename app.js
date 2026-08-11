@@ -96,6 +96,7 @@ let els = {
   paceStatus: document.getElementById("paceStatus"),
   meetingsBooked: document.getElementById("meetingsBooked"),
   teamHoursToday: document.getElementById("teamHoursToday"),
+  sprintHoursTotal: document.getElementById("sprintHoursTotal"),
   streak: document.getElementById("streak"),
   selectedDateLabel: document.getElementById("selectedDateLabel"),
   dateBar: document.getElementById("dateBar"),
@@ -575,6 +576,42 @@ function sessionMs(person, dayKey, now = Date.now()) {
   return ms;
 }
 
+function sessionDurationMs(s, now = Date.now()) {
+  const start = new Date(s.in).getTime();
+  const end = s.out ? new Date(s.out).getTime() : now;
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return 0;
+  return end - start;
+}
+
+function renderSessionLog(person, dayKey) {
+  const list = document.getElementById(`sessionLog-${person}`);
+  const sprintEl = document.getElementById(`sessionSprint-${person}`);
+  if (!list) return;
+  const sessions = ensureDay(dayKey)[person].sessions || [];
+  if (!sessions.length) {
+    list.innerHTML = `<li class="session-log__empty">No clock sessions yet for this day.</li>`;
+  } else {
+    list.innerHTML = sessions
+      .map((s, i) => {
+        const open = !s.out;
+        const dur = fmtDuration(sessionDurationMs(s));
+        const outCell = open
+          ? '<span class="live-tag">Live</span>'
+          : fmtTime(s.out);
+        return `<li class="session-log__row${open ? " is-live" : ""}">
+          <span class="session-log__idx">#${i + 1}</span>
+          <span class="session-log__in">${fmtTime(s.in)}</span>
+          <span class="session-log__out">${outCell}</span>
+          <span class="session-log__dur">${dur}</span>
+        </li>`;
+      })
+      .join("");
+  }
+  if (sprintEl) {
+    sprintEl.innerHTML = `Sprint total · <b>${fmtDuration(totalHoursSprint(person))}</b>`;
+  }
+}
+
 function openSession(person, dayKey) {
   const sessions = ensureDay(dayKey)[person].sessions;
   return sessions.find((s) => !s.out) || null;
@@ -789,10 +826,24 @@ function allActivity() {
           createdAt: t.createdAt || k,
         });
       }
+      for (const s of state.days[k][person].sessions || []) {
+        const dur = fmtDuration(sessionDurationMs(s));
+        items.push({
+          date: k,
+          person,
+          title: s.out
+            ? `Clock out · ${dur} session`
+            : `Clock in · live (${dur} so far)`,
+          category: "hours",
+          outcome: null,
+          area: `${fmtTime(s.in)} → ${s.out ? fmtTime(s.out) : "live"}`,
+          createdAt: s.out || s.in,
+        });
+      }
     }
   }
   items.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
-  return items.slice(0, 40);
+  return items.slice(0, 50);
 }
 
 // —— Render ——
@@ -827,6 +878,11 @@ function renderHeader() {
   els.streak.textContent = String(currentStreak());
   if (els.teamHoursToday) {
     els.teamHoursToday.textContent = fmtDuration(totalHoursForDay(keyFor(selectedDate)));
+  }
+  if (els.sprintHoursTotal) {
+    const sprintMs = totalHoursSprint();
+    els.sprintHoursTotal.textContent = fmtDuration(sprintMs);
+    els.sprintHoursTotal.title = `Varsha ${fmtDuration(totalHoursSprint("varsha"))} · Siddharth ${fmtDuration(totalHoursSprint("siddharth"))}`;
   }
 }
 
@@ -901,6 +957,7 @@ function renderTimebox(person, dayKey) {
   if (box) box.classList.toggle("is-live", !!open);
   if (btnIn) btnIn.disabled = !!open;
   if (btnOut) btnOut.disabled = !open;
+  renderSessionLog(person, dayKey);
 }
 
 function renderToday() {
@@ -2566,12 +2623,18 @@ document.getElementById("clearData").onclick = async () => {
   }, 12000);
   setInterval(() => {
     const k = keyFor(selectedDate);
+    let live = false;
     for (const person of ["varsha", "siddharth"]) {
       if (!openSession(person, k)) continue;
-      const durEl = document.getElementById(`duration-${person}`);
-      if (durEl) durEl.textContent = fmtDuration(sessionMs(person, k));
+      live = true;
+      renderTimebox(person, k);
+    }
+    if (live) {
       if (els.teamHoursToday) {
         els.teamHoursToday.textContent = fmtDuration(totalHoursForDay(k));
+      }
+      if (els.sprintHoursTotal) {
+        els.sprintHoursTotal.textContent = fmtDuration(totalHoursSprint());
       }
     }
   }, 1000);

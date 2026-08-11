@@ -85,8 +85,12 @@
           <strong class="hero-tile__value" id="meetingsBooked">0</strong>
         </div>
         <div class="hero-tile">
-          <span class="hero-tile__kicker">Team hours</span>
+          <span class="hero-tile__kicker">Hours · this day</span>
           <strong class="hero-tile__value" id="teamHoursToday">0h 00m</strong>
+        </div>
+        <div class="hero-tile">
+          <span class="hero-tile__kicker">Sprint hours (overall)</span>
+          <strong class="hero-tile__value" id="sprintHoursTotal">0h 00m</strong>
         </div>
       </div>
 
@@ -147,6 +151,11 @@
             <div class="timebox-actions">
               <button type="button" class="btn-in" data-clock="in" data-person="varsha">Clock in</button>
               <button type="button" class="btn-out" data-clock="out" data-person="varsha">Clock out</button>
+            </div>
+            <div class="session-log-wrap">
+              <p class="session-log-head">All sessions · this day</p>
+              <ul class="session-log" id="sessionLog-varsha" aria-label="Clock sessions for Varsha"></ul>
+              <p class="session-sprint-total" id="sessionSprint-varsha">Sprint total · 0h 00m</p>
             </div>
           </div>
 
@@ -244,6 +253,11 @@
             <div class="timebox-actions">
               <button type="button" class="btn-in" data-clock="in" data-person="siddharth">Clock in</button>
               <button type="button" class="btn-out" data-clock="out" data-person="siddharth">Clock out</button>
+            </div>
+            <div class="session-log-wrap">
+              <p class="session-log-head">All sessions · this day</p>
+              <ul class="session-log" id="sessionLog-siddharth" aria-label="Clock sessions for Siddharth"></ul>
+              <p class="session-sprint-total" id="sessionSprint-siddharth">Sprint total · 0h 00m</p>
             </div>
           </div>
 
@@ -452,7 +466,7 @@
     <section class="view" id="view-backup" hidden>
       <div class="glass-panel backup-panel">
         <h2>Backup</h2>
-        <p class="sync-hint">Export logs or calling lists anytime. Excel uses Sheet 1 Varsha / Sheet 2 Siddharth.</p>
+        <p class="sync-hint">Everything saves on this device automatically. Cloud sync keeps both laptops in sync — pushing app updates does not delete your logs.</p>
         <div class="data-actions">
           <button type="button" class="ghost-btn" id="exportExcel">Export Excel</button>
           <button type="button" class="ghost-btn" id="exportData">Export JSON</button>
