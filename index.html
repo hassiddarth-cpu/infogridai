@@ -23,7 +23,7 @@
           <span class="brand-name">INFOGRID AI</span>
         </a>
         <div class="hero-meta">
-          <div class="pill" id="syncStatus"><i class="pulse"></i><span>LOCAL</span></div>
+          <div class="pill is-live" id="syncStatus"><i class="pulse"></i><span>COACH ON</span></div>
           <div class="clock" id="liveClock">--:--:--</div>
         </div>
       </div>
@@ -31,6 +31,47 @@
       <p class="hero-kicker">Agency sprint · Aug–Sep 2026</p>
       <h1 class="title">Sprint Tracker</h1>
       <p class="sprint-range" id="sprintRange">Aug 10 – Sep 30, 2026</p>
+      <p class="sprint-today-hint">Selected day is below in Today · sprint window starts Aug 10</p>
+
+      <section class="ai-coach" id="aiCoach" aria-label="Infogrid AI assistant">
+        <div class="ai-coach-head">
+          <div class="ai-avatar" aria-hidden="true">AI</div>
+          <div>
+            <h2>Infogrid Coach</h2>
+            <p class="ai-mood" id="coachMood">Scanning today’s effort…</p>
+          </div>
+        </div>
+        <p class="ai-flash" id="coachFlash" hidden></p>
+        <div class="ai-coach-grid">
+          <article class="ai-card ai-card--good">
+            <h3>Good news</h3>
+            <ul id="coachGood"></ul>
+          </article>
+          <article class="ai-card ai-card--bad">
+            <h3>Reality check</h3>
+            <ul id="coachBad"></ul>
+          </article>
+        </div>
+      </section>
+
+      <div class="countdown-row" aria-label="Countdowns">
+        <div class="countdown">
+          <span class="countdown-label">Month end</span>
+          <strong class="countdown-value" id="cdMonth">—</strong>
+        </div>
+        <div class="countdown">
+          <span class="countdown-label">Year end</span>
+          <strong class="countdown-value" id="cdYear">—</strong>
+        </div>
+        <div class="countdown countdown--varsha">
+          <span class="countdown-label">Varsha · Feb 21</span>
+          <strong class="countdown-value" id="cdVarshaBday">—</strong>
+        </div>
+        <div class="countdown countdown--sid">
+          <span class="countdown-label">Siddharth · Jan 27</span>
+          <strong class="countdown-value" id="cdSidBday">—</strong>
+        </div>
+      </div>
 
       <div class="progress-duo" aria-label="Sprint progress">
         <svg class="ring ring--varsha" viewBox="0 0 120 120" aria-hidden="true">
@@ -70,16 +111,17 @@
 
     <nav class="tabs" role="tablist">
       <button class="tab rail-btn is-active" data-view="today">Today</button>
+      <button class="tab rail-btn" data-view="calling">Calling</button>
       <button class="tab rail-btn" data-view="month">Month</button>
       <button class="tab rail-btn" data-view="logs">Analytics</button>
       <button class="tab rail-btn" data-view="goals">Goals</button>
-      <button class="tab rail-btn" data-view="sync">Sync</button>
+      <button class="tab rail-btn" data-view="backup">Backup</button>
     </nav>
 
     <section class="date-bar" id="dateBar">
       <button class="icon-btn" id="prevDay" type="button">‹</button>
       <div class="date-display">
-        <span id="selectedDateLabel">Mon, 10 Aug 2026</span>
+        <span id="selectedDateLabel">Loading date…</span>
         <button class="chip" id="jumpToday" type="button">Today</button>
       </div>
       <button class="icon-btn" id="nextDay" type="button">›</button>
@@ -93,6 +135,7 @@
           <header class="person-head">
             <div>
               <h2>Varsha <span class="age">24</span></h2>
+              <span class="bday-line" id="bdayLine-varsha">Birthday Feb 21 · —</span>
               <span class="dot" aria-hidden="true"></span>
             </div>
             <div class="person-pct" id="varshaDayPct">0/0 · 0%</div>
@@ -117,6 +160,7 @@
           <div class="quick-actions">
             <button type="button" data-quick="Cold call" data-cat="sales">+ Sales call</button>
             <button type="button" data-quick="Ad learning" data-cat="ads">+ Ad learning</button>
+            <button type="button" data-quick="New skill" data-cat="skill">+ New skill</button>
             <button type="button" data-quick="" data-cat="custom" class="custom-toggle">+ Custom task</button>
           </div>
 
@@ -125,6 +169,7 @@
             <select name="category">
               <option value="sales" selected>Sales</option>
               <option value="ads">Ads</option>
+              <option value="skill">Skill</option>
               <option value="learning">Learning</option>
               <option value="ops">Ops</option>
               <option value="other">Other</option>
@@ -153,6 +198,7 @@
           <header class="person-head">
             <div>
               <h2>Siddharth <span class="age">25</span></h2>
+              <span class="bday-line" id="bdayLine-siddharth">Birthday Jan 27 · —</span>
               <span class="dot" aria-hidden="true"></span>
             </div>
             <div class="person-pct" id="sidDayPct">0/0 · 0%</div>
@@ -177,6 +223,7 @@
           <div class="quick-actions">
             <button type="button" data-quick="Cold call" data-cat="sales">+ Sales call</button>
             <button type="button" data-quick="Ad learning" data-cat="ads">+ Ad learning</button>
+            <button type="button" data-quick="New skill" data-cat="skill">+ New skill</button>
             <button type="button" data-quick="" data-cat="custom" class="custom-toggle">+ Custom task</button>
           </div>
 
@@ -185,6 +232,7 @@
             <select name="category">
               <option value="sales" selected>Sales</option>
               <option value="ads">Ads</option>
+              <option value="skill">Skill</option>
               <option value="learning">Learning</option>
               <option value="ops">Ops</option>
               <option value="other">Other</option>
@@ -282,54 +330,55 @@
       </form>
     </section>
 
-    <section class="view" id="view-sync" hidden>
-      <div class="setup-banner glass-panel">
-        <h2>Two devices · 100% free</h2>
-        <p>Firebase Spark (free database) + Netlify or GitHub Pages (free hosting). No credit card.</p>
-        <div class="setup-steps">
-          <div>
-            <h4>Step A · Public URL (pick one)</h4>
-            <ol class="steps">
-              <li><strong>Netlify:</strong> <a href="https://app.netlify.com/drop" target="_blank" rel="noopener">app.netlify.com/drop</a> → drag this whole folder → <strong>Claim this site</strong> (free signup; unclaimed drops die in 1 hour)</li>
-              <li><strong>GitHub Pages:</strong> repo Settings → Pages → branch <code>main</code> / root → <code>https://hassiddarth-cpu.github.io/infogridai/</code></li>
-              <li>Include <code>cloud-config.json</code> in the folder after you connect below</li>
-            </ol>
-          </div>
-          <div>
-            <h4>Step B · Firebase Spark</h4>
-            <ol class="steps">
-              <li><a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase Console</a> → Create project (Spark / free)</li>
-              <li>Add web app → copy <code>firebaseConfig</code></li>
-              <li>Build → Realtime Database → create in <strong>test mode</strong></li>
-              <li>Vault code: <code>infogrid-sprint</code> → paste config below → Connect</li>
-            </ol>
-          </div>
+    <section class="view" id="view-calling" hidden>
+      <div class="calling-head glass-panel">
+        <div>
+          <h2>Calling lists</h2>
+          <p>Upload Excel with <strong>Sheet 1 = Varsha</strong> and <strong>Sheet 2 = Siddharth</strong>, or CSV. Columns: Business name, Address, Phone number, Google map link, Stage.</p>
         </div>
-        <p class="free-note">Free limits are enough for 2 people over 2 months. Status must show <strong>CLOUD LIVE</strong>.</p>
+        <div class="calling-actions">
+          <label class="ghost-btn file-label">Upload sheet<input type="file" id="importCallSheet" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" hidden /></label>
+          <button type="button" class="ghost-btn" id="downloadCallTemplate">Download template</button>
+          <button type="button" class="ghost-btn" id="exportCallLists">Export lists</button>
+          <label class="call-mode"><input type="checkbox" id="callAppendMode" /> Append (don’t replace)</label>
+        </div>
+        <p class="sync-hint" id="callImportHint">Stage values: owner connected, busy, voicemail, failed, gatekeeper. Changing stage logs a sales call for today.</p>
       </div>
-      <div class="sync-layout">
-        <div class="glass-panel">
-          <h2>Connect cloud database</h2>
-          <form id="syncForm" class="sync-form">
-            <label>Shared vault code<input name="vault" id="vaultInput" value="infogrid-sprint" placeholder="infogrid-sprint" required /></label>
-            <label>Firebase config JSON<textarea name="config" id="configInput" rows="8" required placeholder='{ "apiKey": "...", "databaseURL": "..." }'></textarea></label>
-            <div class="sync-actions">
-              <button type="submit">Connect cloud</button>
-              <button type="button" class="ghost" id="copyInvite">Copy invite</button>
-              <button type="button" class="ghost" id="disconnectSync">Disconnect</button>
-            </div>
-          </form>
-          <p class="sync-hint" id="syncHint">Not connected — only this browser has data.</p>
+      <div class="calling-filter">
+        <button type="button" class="chip is-active" data-call-filter="all">All</button>
+        <button type="button" class="chip" data-call-filter="open">Not called</button>
+        <button type="button" class="chip" data-call-filter="done">Staged</button>
+      </div>
+      <div class="people calling-people">
+        <div class="glass-panel calling-col person--varsha">
+          <header class="calling-col-head">
+            <h3>Varsha</h3>
+            <span id="callCount-varsha">0 leads</span>
+          </header>
+          <div class="call-list" id="callList-varsha"></div>
+          <p class="empty" id="callEmpty-varsha">No leads yet — upload Sheet 1 (Varsha).</p>
         </div>
-        <div class="glass-panel">
-          <h2>Backup</h2>
-          <div class="data-actions">
-            <button type="button" class="ghost-btn" id="exportData">Export</button>
-            <label class="ghost-btn file-label">Import<input type="file" id="importData" accept="application/json" hidden /></label>
-            <button type="button" class="ghost-btn" id="downloadCloudConfig">Download cloud-config.json</button>
-          </div>
-          <button type="button" class="danger-btn" id="clearData">Clear all data</button>
+        <div class="glass-panel calling-col person--sid">
+          <header class="calling-col-head">
+            <h3>Siddharth</h3>
+            <span id="callCount-siddharth">0 leads</span>
+          </header>
+          <div class="call-list" id="callList-siddharth"></div>
+          <p class="empty" id="callEmpty-siddharth">No leads yet — upload Sheet 2 (Siddharth).</p>
         </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-backup" hidden>
+      <div class="glass-panel backup-panel">
+        <h2>Backup</h2>
+        <p class="sync-hint">Export logs or calling lists anytime. Excel uses Sheet 1 Varsha / Sheet 2 Siddharth.</p>
+        <div class="data-actions">
+          <button type="button" class="ghost-btn" id="exportExcel">Export Excel</button>
+          <button type="button" class="ghost-btn" id="exportData">Export JSON</button>
+          <label class="ghost-btn file-label">Import<input type="file" id="importData" accept="application/json" hidden /></label>
+        </div>
+        <button type="button" class="danger-btn" id="clearData">Clear all data</button>
       </div>
     </section>
 
@@ -341,20 +390,9 @@
     </footer>
   </div>
 
-  <div class="cloud-gate" id="cloudGate" hidden>
-    <div class="cloud-gate-card">
-      <p class="eyebrow">100% free · multi-device</p>
-      <h2>Connect free cloud so both of you can fill this anytime</h2>
-      <p>Netlify or GitHub Pages + Firebase Spark. No credit card. Claim Netlify Drop or use Pages — sync works when status shows CLOUD LIVE.</p>
-      <div class="cloud-gate-actions">
-        <button type="button" class="gate-primary" id="gateOpenSync">Set up cloud sync</button>
-        <button type="button" class="gate-secondary" id="gateDismiss">Continue on this device only</button>
-      </div>
-    </div>
-  </div>
-
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

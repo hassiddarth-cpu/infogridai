@@ -5,8 +5,8 @@ const SPRINT_START = new Date(2026, 7, 10);
 const SPRINT_END = new Date(2026, 8, 30);
 
 const PEOPLE = {
-  varsha: { name: "Varsha", age: 24 },
-  siddharth: { name: "Siddharth", age: 25 },
+  varsha: { name: "Varsha", age: 24, birthday: { month: 2, day: 21 } },
+  siddharth: { name: "Siddharth", age: 25, birthday: { month: 1, day: 27 } },
 };
 
 const OUTCOME_LABELS = {
@@ -52,10 +52,10 @@ const CALL_RING = 2 * Math.PI * 28;
 const DUO_CIRC = 2 * Math.PI * 52;
 
 const STATUS_LINES = [
-  "Infogrid AI · log today's outreach",
-  "200-call sprint · stay on pace",
-  "Outcomes unlock conversion averages",
-  "Ads + calls compound · one session daily",
+  "Infogrid Coach · celebrate skills, punish silence",
+  "200-call sprint · every missed dial is lost ground",
+  "New skill? Log it — coach will congratulate you",
+  "Open leads don’t age well · update stages today",
 ];
 
 let syncing = false;
@@ -65,7 +65,15 @@ let dbRef = null;
 let saveTimer = null;
 
 // Placeholders — initialized after helpers + DOM are ready
-let state = { days: {}, goals: structuredClone(DEFAULT_GOALS), updatedAt: Date.now() };
+let state = {
+  days: {},
+  goals: structuredClone(DEFAULT_GOALS),
+  callLists: { varsha: [], siddharth: [] },
+  updatedAt: Date.now(),
+};
+let callFilter = "all";
+let coachFlash = null;
+let coachFlashUntil = 0;
 let selectedDate = startOfDay(new Date());
 let calendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
 let els = {
@@ -98,8 +106,16 @@ let els = {
   syncHint: document.getElementById("syncHint"),
   vaultInput: document.getElementById("vaultInput"),
   configInput: document.getElementById("configInput"),
+  coachMood: document.getElementById("coachMood"),
+  coachGood: document.getElementById("coachGood"),
+  coachBad: document.getElementById("coachBad"),
+  coachFlashEl: document.getElementById("coachFlash"),
   liveClock: document.getElementById("liveClock"),
   jarvisLine: document.getElementById("jarvisLine"),
+  cdMonth: document.getElementById("cdMonth"),
+  cdYear: document.getElementById("cdYear"),
+  cdVarshaBday: document.getElementById("cdVarshaBday"),
+  cdSidBday: document.getElementById("cdSidBday"),
   avgBoard: document.getElementById("avgBoard"),
   logsKpis: document.getElementById("logsKpis"),
   monthlyCallsChart: document.getElementById("monthlyCallsChart"),
@@ -122,6 +138,9 @@ function migrateGoals(s) {
   }
   // drop old goals
   s.goals = s.goals.filter((g) => g.id !== "g-agency" && g.id !== "g-meetings");
+  if (!s.callLists) s.callLists = { varsha: [], siddharth: [] };
+  if (!Array.isArray(s.callLists.varsha)) s.callLists.varsha = [];
+  if (!Array.isArray(s.callLists.siddharth)) s.callLists.siddharth = [];
 }
 
 function salesGoalTarget() {
@@ -216,11 +235,11 @@ function queueCloudPush() {
       setSyncUi("live", "CLOUD LIVE · SYNCING");
       await dbRef.set(state);
       setSyncUi("live", "CLOUD LIVE");
-      els.syncHint.textContent = `Status: cloud linked · last push ${new Date().toLocaleTimeString()}`;
+      if (els.syncHint) els.syncHint.textContent = `Status: cloud linked · last push ${new Date().toLocaleTimeString()}`;
     } catch (err) {
       console.error(err);
       setSyncUi("error", "SYNC ERROR");
-      els.syncHint.textContent = `Push failed: ${err.message}`;
+      if (els.syncHint) els.syncHint.textContent = `Push failed: ${err.message}`;
     } finally {
       syncing = false;
     }
@@ -228,10 +247,16 @@ function queueCloudPush() {
 }
 
 function setSyncUi(mode, label) {
-  els.syncStatus.classList.remove("is-live", "is-error");
-  if (mode === "live") els.syncStatus.classList.add("is-live");
-  if (mode === "error") els.syncStatus.classList.add("is-error");
-  els.syncStatus.querySelector("span").textContent = label;
+  if (!els.syncStatus) return;
+  if (mode === "error") {
+    els.syncStatus.classList.remove("is-live");
+    els.syncStatus.classList.add("is-error");
+    els.syncStatus.querySelector("span").textContent = label || "SYNC ERROR";
+    return;
+  }
+  els.syncStatus.classList.remove("is-error");
+  els.syncStatus.classList.add("is-live");
+  els.syncStatus.querySelector("span").textContent = "COACH ON";
 }
 
 function loadSyncConfig() {
@@ -250,11 +275,8 @@ function isCloudLive() {
   return !!(dbRef && loadSyncConfig()?.config && loadSyncConfig()?.vault);
 }
 
-function showCloudGate(show) {
-  const gate = document.getElementById("cloudGate");
-  if (!gate) return;
-  const dismissed = localStorage.getItem("infogrid-gate-dismissed") === "1";
-  gate.hidden = !show || dismissed || isCloudLive();
+function showCloudGate(_show) {
+  /* Sync / cloud onboarding UI removed */
 }
 
 async function tryLoadHostedCloudConfig() {
@@ -288,13 +310,13 @@ function downloadCloudConfigFile() {
 
 function copyTeammateInvite() {
   const saved = loadSyncConfig();
-  const vault = els.vaultInput.value.trim() || saved?.vault;
+  const vault = (els.vaultInput?.value || "").trim() || saved?.vault;
   let config = saved?.config;
-  if (!config) {
+  if (!config && els.configInput?.value) {
     try {
       config = JSON.parse(els.configInput.value);
     } catch {
-      alert("Connect cloud (or paste a valid Firebase config) first.");
+      alert("No Firebase config saved.");
       return;
     }
   }
@@ -305,7 +327,7 @@ function copyTeammateInvite() {
   const payload = JSON.stringify({ vault, config }, null, 2);
   navigator.clipboard.writeText(payload).then(
     () => {
-      els.syncHint.textContent =
+      if (els.syncHint) els.syncHint.textContent =
         "Invite copied. Teammate: open Sync → paste into Firebase config box → set same vault → Connect.";
       alert("Invite copied. Send it to your teammate (chat/email). They paste it in Sync and Connect.");
     },
@@ -319,8 +341,8 @@ function maybeParseInvitePaste(raw) {
   try {
     const data = JSON.parse(raw);
     if (data.vault && data.config) {
-      els.vaultInput.value = data.vault;
-      els.configInput.value = JSON.stringify(data.config, null, 2);
+      if (els.vaultInput) els.vaultInput.value = data.vault;
+      if (els.configInput) els.configInput.value = JSON.stringify(data.config, null, 2);
       return true;
     }
   } catch {
@@ -358,7 +380,7 @@ async function connectCloud(config, vault) {
               .set(state)
               .then(() => {
                 setSyncUi("live", "CLOUD LIVE");
-                els.syncHint.textContent = `Status: cloud linked · vault “${safeVault}” seeded from this Mac`;
+                if (els.syncHint) els.syncHint.textContent = `Status: cloud linked · vault “${safeVault}” seeded from this Mac`;
                 resolve();
               })
               .catch(reject);
@@ -367,6 +389,7 @@ async function connectCloud(config, vault) {
           if ((remote.updatedAt || 0) >= (state.updatedAt || 0)) {
             applyingRemote = true;
             state = remote;
+            migrateGoals(state);
             if (!state.goals) state.goals = structuredClone(DEFAULT_GOALS);
             if (!state.days) state.days = {};
             saveLocal();
@@ -376,7 +399,7 @@ async function connectCloud(config, vault) {
             dbRef.set(state);
           }
           setSyncUi("live", "CLOUD LIVE");
-          els.syncHint.textContent = `Status: cloud linked · vault “${safeVault}” · live for both Macs`;
+          if (els.syncHint) els.syncHint.textContent = `Status: cloud linked · vault “${safeVault}” · live for both Macs`;
           resolve();
           return;
         }
@@ -384,6 +407,7 @@ async function connectCloud(config, vault) {
         if ((remote.updatedAt || 0) <= (state.updatedAt || 0)) return;
         applyingRemote = true;
         state = remote;
+        migrateGoals(state);
         if (!state.goals) state.goals = structuredClone(DEFAULT_GOALS);
         if (!state.days) state.days = {};
         saveLocal();
@@ -393,7 +417,7 @@ async function connectCloud(config, vault) {
       },
       (err) => {
         setSyncUi("error", "SYNC ERROR");
-        els.syncHint.textContent = err.message;
+        if (els.syncHint) els.syncHint.textContent = err.message;
         reject(err);
       }
     );
@@ -405,10 +429,10 @@ function disconnectCloud() {
   dbRef = null;
   db = null;
   localStorage.removeItem(SYNC_KEY);
-  setSyncUi("", "LOCAL");
-  els.syncHint.textContent = "Status: local only. Data is on this browser until cloud is connected.";
-  els.vaultInput.value = "";
-  els.configInput.value = "";
+  setSyncUi("", "COACH ON");
+  if (els.syncHint) els.syncHint.textContent = "Status: local only.";
+  if (els.vaultInput) els.vaultInput.value = "";
+  if (els.configInput) els.configInput.value = "";
 }
 
 // —— Date helpers ——
@@ -483,6 +507,70 @@ function fmtDuration(ms) {
   return `${m}m ${String(s).padStart(2, "0")}s`;
 }
 
+function nextMonthEnd(from = new Date()) {
+  return new Date(from.getFullYear(), from.getMonth() + 1, 0, 23, 59, 59, 999);
+}
+
+function nextYearEnd(from = new Date()) {
+  return new Date(from.getFullYear(), 11, 31, 23, 59, 59, 999);
+}
+
+function nextBirthday(month, day, from = new Date()) {
+  const today = startOfDay(from);
+  let target = new Date(from.getFullYear(), month - 1, day, 0, 0, 0, 0);
+  if (target < today) {
+    target = new Date(from.getFullYear() + 1, month - 1, day, 0, 0, 0, 0);
+  }
+  return target;
+}
+
+function formatCountdown(target, now = new Date()) {
+  const ms = target.getTime() - now.getTime();
+  if (ms <= 0) return "Now";
+  const totalSec = Math.floor(ms / 1000);
+  const days = Math.floor(totalSec / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const mins = Math.floor((totalSec % 3600) / 60);
+  const secs = totalSec % 60;
+  if (days > 0) {
+    return `${days}d ${String(hours).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m`;
+  }
+  return `${String(hours).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m ${String(secs).padStart(2, "0")}s`;
+}
+
+function isSameCalendarDay(a, b) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function tickCountdowns() {
+  const now = new Date();
+  if (els.cdMonth) els.cdMonth.textContent = formatCountdown(nextMonthEnd(now), now);
+  if (els.cdYear) els.cdYear.textContent = formatCountdown(nextYearEnd(now), now);
+
+  for (const [person, elId, lineId] of [
+    ["varsha", "cdVarshaBday", "bdayLine-varsha"],
+    ["siddharth", "cdSidBday", "bdayLine-siddharth"],
+  ]) {
+    const { month, day } = PEOPLE[person].birthday;
+    const next = nextBirthday(month, day, now);
+    const el = document.getElementById(elId);
+    const line = document.getElementById(lineId);
+    const label = `${String(day).padStart(2, "0")} ${next.toLocaleString("en-GB", { month: "short" })}`;
+    if (isSameCalendarDay(now, next)) {
+      if (el) el.textContent = "Today!";
+      if (line) line.textContent = `Birthday ${label} · Today!`;
+    } else {
+      const text = formatCountdown(next, now);
+      if (el) el.textContent = text;
+      if (line) line.textContent = `Birthday ${label} · ${text}`;
+    }
+  }
+}
+
 function sessionMs(person, dayKey, now = Date.now()) {
   const day = state.days[dayKey];
   if (!day) return 0;
@@ -510,7 +598,7 @@ function clockIn(person) {
   day[person].sessions.push({ id: uid(), in: new Date().toISOString(), out: null });
   persist();
   renderAll();
-  els.jarvisLine.textContent = `${PEOPLE[person].name} clocked in`;
+  celebrate(`${PEOPLE[person].name} clocked in. Best of luck this session — make the hours count.`, "good");
 }
 
 function clockOut(person) {
@@ -1089,12 +1177,459 @@ function renderGoals() {
   });
 }
 
+// —— Calling lists (Excel / CSV) ——
+const CALL_HEADER_MAP = {
+  businessname: "businessName",
+  business: "businessName",
+  name: "businessName",
+  company: "businessName",
+  companyname: "businessName",
+  address: "address",
+  phone: "phone",
+  phonenumber: "phone",
+  phoneno: "phone",
+  mobile: "phone",
+  googlemaplink: "mapLink",
+  googlemapslink: "mapLink",
+  googlemaps: "mapLink",
+  googlemap: "mapLink",
+  maplink: "mapLink",
+  map: "mapLink",
+  maps: "mapLink",
+  stage: "stage",
+  result: "stage",
+  outcome: "stage",
+  status: "stage",
+  person: "person",
+  caller: "person",
+};
+
+function normalizeHeaderKey(h) {
+  return String(h || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+function normalizeStage(raw) {
+  const s = String(raw || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ");
+  if (!s) return "";
+  if (OUTCOME_LABELS[s]) return s;
+  if (s.includes("owner") || s.includes("connect")) return "connected";
+  if (s.includes("busy")) return "busy";
+  if (s.includes("voice") || s === "vm") return "voicemail";
+  if (s.includes("fail") || s.includes("wrong") || s.includes("not owner") || s.includes("customer")) {
+    return "failed";
+  }
+  if (s.includes("gate") || s.includes("reception")) return "gatekeeper";
+  return "";
+}
+
+function normalizePersonKey(raw) {
+  const s = String(raw || "")
+    .trim()
+    .toLowerCase();
+  if (!s) return "";
+  if (s.startsWith("var")) return "varsha";
+  if (s.startsWith("sid")) return "siddharth";
+  return "";
+}
+
+function sheetNameToPerson(name, index) {
+  const key = normalizePersonKey(name);
+  if (key) return key;
+  if (index === 0) return "varsha";
+  if (index === 1) return "siddharth";
+  return "";
+}
+
+function rowsToLeads(rows) {
+  if (!rows?.length) return [];
+  const headers = rows[0].map((h) => CALL_HEADER_MAP[normalizeHeaderKey(h)] || "");
+  const leads = [];
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i] || [];
+    if (!row.some((c) => String(c || "").trim())) continue;
+    const obj = {
+      businessName: "",
+      address: "",
+      phone: "",
+      mapLink: "",
+      stage: "",
+      person: "",
+    };
+    headers.forEach((field, idx) => {
+      if (!field) return;
+      obj[field] = String(row[idx] ?? "").trim();
+    });
+    if (!obj.businessName && !obj.phone) continue;
+    leads.push({
+      id: uid(),
+      businessName: obj.businessName || "Untitled business",
+      address: obj.address || "",
+      phone: obj.phone || "",
+      mapLink: obj.mapLink || "",
+      stage: normalizeStage(obj.stage),
+      person: normalizePersonKey(obj.person),
+      updatedAt: Date.now(),
+    });
+  }
+  return leads;
+}
+
+function parseCsvText(text) {
+  const wb = XLSX.read(text, { type: "string", FS: "," });
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+}
+
+async function parseCallWorkbook(file) {
+  if (typeof XLSX === "undefined") {
+    throw new Error("Sheet library failed to load. Refresh and try again.");
+  }
+  const name = (file.name || "").toLowerCase();
+  const isCsv = name.endsWith(".csv") || file.type === "text/csv";
+  const lists = { varsha: [], siddharth: [] };
+
+  if (isCsv) {
+    const text = await file.text();
+    const rows = parseCsvText(text);
+    const leads = rowsToLeads(rows);
+    const hasPersonCol = leads.some((l) => l.person);
+    if (hasPersonCol) {
+      for (const lead of leads) {
+        const p = lead.person || "varsha";
+        if (lists[p]) lists[p].push({ ...lead, person: undefined });
+      }
+    } else {
+      const choice = prompt(
+        "CSV has one sheet. Type varsha or siddharth for this file (or cancel).",
+        "varsha"
+      );
+      const p = normalizePersonKey(choice);
+      if (!p) throw new Error("Cancelled or invalid person for CSV.");
+      lists[p] = leads.map(({ person, ...rest }) => rest);
+    }
+    return lists;
+  }
+
+  const buffer = await file.arrayBuffer();
+  const wb = XLSX.read(buffer, { type: "array" });
+  const named = { varsha: false, siddharth: false };
+
+  wb.SheetNames.forEach((sheetName, index) => {
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: "" });
+    const leads = rowsToLeads(rows);
+    const hasPersonCol = leads.some((l) => l.person);
+    if (hasPersonCol) {
+      for (const lead of leads) {
+        const p = lead.person;
+        if (!p || !lists[p]) continue;
+        const { person: _p, ...rest } = lead;
+        lists[p].push(rest);
+        named[p] = true;
+      }
+      return;
+    }
+    const person = sheetNameToPerson(sheetName, index);
+    if (!person || !lists[person]) return;
+    if (index >= 2 && !normalizePersonKey(sheetName)) return;
+    lists[person] = leads.map(({ person: _p, ...rest }) => rest);
+    named[person] = true;
+  });
+
+  return lists;
+}
+
+function applyCallLists(incoming, append) {
+  migrateGoals(state);
+  for (const person of ["varsha", "siddharth"]) {
+    const next = incoming[person] || [];
+    if (!next.length && append) continue;
+    state.callLists[person] = append
+      ? [...(state.callLists[person] || []), ...next]
+      : next;
+  }
+  persist();
+  renderAll();
+}
+
+function setLeadStage(person, leadId, stage) {
+  migrateGoals(state);
+  const lead = (state.callLists[person] || []).find((l) => l.id === leadId);
+  if (!lead) return;
+  const prev = lead.stage || "";
+  lead.stage = stage || "";
+  lead.updatedAt = Date.now();
+  if (stage && stage !== prev) {
+    const areaGuess = (lead.address || "").split(",")[0]?.trim() || "";
+    addTask(person, lead.businessName || "Cold call", "sales", stage, areaGuess);
+    return;
+  }
+  if (!stage && prev) {
+    celebrate(
+      `${PEOPLE[person].name}: “${lead.businessName}” is back to not called. Half-updated lists waste the sprint — finish the stage.`,
+      "bad"
+    );
+  }
+  persist();
+  renderCalling();
+  renderCoach();
+}
+
+function renderCalling() {
+  migrateGoals(state);
+  for (const person of ["varsha", "siddharth"]) {
+    const listEl = document.getElementById(`callList-${person}`);
+    const emptyEl = document.getElementById(`callEmpty-${person}`);
+    const countEl = document.getElementById(`callCount-${person}`);
+    if (!listEl) continue;
+    listEl.innerHTML = "";
+    let leads = state.callLists[person] || [];
+    if (callFilter === "open") leads = leads.filter((l) => !l.stage);
+    if (callFilter === "done") leads = leads.filter((l) => !!l.stage);
+    if (countEl) {
+      const total = (state.callLists[person] || []).length;
+      const open = (state.callLists[person] || []).filter((l) => !l.stage).length;
+      countEl.textContent = `${total} leads · ${open} open`;
+    }
+    if (emptyEl) emptyEl.hidden = leads.length > 0;
+    for (const lead of leads) {
+      const card = document.createElement("article");
+      card.className = "call-card";
+      const phoneHref = lead.phone ? `tel:${lead.phone.replace(/[^\d+]/g, "")}` : "";
+      const mapHref = lead.mapLink || "";
+      card.innerHTML = `
+        <h4></h4>
+        <p class="call-meta"></p>
+        <div class="call-links"></div>
+        <div class="call-stage">
+          <label>Stage</label>
+          <select>
+            <option value="">Not called</option>
+            <option value="connected">Owner connected</option>
+            <option value="busy">Busy</option>
+            <option value="voicemail">Voicemail</option>
+            <option value="failed">Failed</option>
+            <option value="gatekeeper">Gatekeeper</option>
+          </select>
+        </div>`;
+      card.querySelector("h4").textContent = lead.businessName;
+      card.querySelector(".call-meta").textContent = lead.address || "No address";
+      const links = card.querySelector(".call-links");
+      if (phoneHref) {
+        const a = document.createElement("a");
+        a.href = phoneHref;
+        a.textContent = lead.phone;
+        links.appendChild(a);
+      } else {
+        const span = document.createElement("span");
+        span.textContent = "No phone";
+        links.appendChild(span);
+      }
+      if (mapHref) {
+        const a = document.createElement("a");
+        a.href = mapHref;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "Map";
+        links.appendChild(a);
+      }
+      const select = card.querySelector("select");
+      select.value = lead.stage || "";
+      select.onchange = () => setLeadStage(person, lead.id, select.value);
+      listEl.appendChild(card);
+    }
+  }
+}
+
+function downloadCallTemplate() {
+  if (typeof XLSX === "undefined") {
+    alert("Sheet library failed to load. Refresh and try again.");
+    return;
+  }
+  const headers = ["Business name", "Address", "Phone number", "Google map link", "Stage"];
+  const sample = [
+    headers,
+    ["Acme Dental", "Houston, TX", "7135550100", "https://maps.google.com/?q=Houston", ""],
+    ["Blue Cafe", "Dallas, TX", "2145550199", "https://maps.google.com/?q=Dallas", "busy"],
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sample), "Varsha");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers]), "Siddharth");
+  XLSX.writeFile(wb, "infogrid-calling-template.xlsx");
+}
+
+function exportCallListsExcel() {
+  if (typeof XLSX === "undefined") {
+    alert("Sheet library failed to load. Refresh and try again.");
+    return;
+  }
+  migrateGoals(state);
+  const wb = XLSX.utils.book_new();
+  for (const [person, sheetName] of [
+    ["varsha", "Varsha"],
+    ["siddharth", "Siddharth"],
+  ]) {
+    const rows = [
+      ["Business name", "Address", "Phone number", "Google map link", "Stage"],
+      ...(state.callLists[person] || []).map((l) => [
+        l.businessName,
+        l.address,
+        l.phone,
+        l.mapLink,
+        OUTCOME_LABELS[l.stage] || l.stage || "",
+      ]),
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), sheetName);
+  }
+  XLSX.writeFile(wb, `infogrid-calling-${keyFor(new Date())}.xlsx`);
+}
+
+
+function celebrate(message, kind = "good") {
+  coachFlash = { message, kind };
+  coachFlashUntil = Date.now() + 14000;
+  if (els.jarvisLine) els.jarvisLine.textContent = message;
+  renderCoach();
+}
+
+function personDayStats(person, dayKey) {
+  const day = state.days[dayKey]?.[person];
+  const tasks = day?.tasks || [];
+  const sales = tasks.filter((t) => t.category === "sales").length;
+  const skills = tasks.filter((t) => ["skill", "learning", "ads"].includes(t.category)).length;
+  const connects = tasks.filter((t) => t.outcome === "connected").length;
+  const openLeads = (state.callLists?.[person] || []).filter((l) => !l.stage).length;
+  const staged = (state.callLists?.[person] || []).filter((l) => !!l.stage).length;
+  const hours = sessionMs(person, dayKey);
+  const clocked = !!openSession(person, dayKey) || (day?.sessions || []).length > 0;
+  return { sales, skills, connects, openLeads, staged, hours, clocked, tasks: tasks.length };
+}
+
+function buildCoachBriefing() {
+  const good = [];
+  const bad = [];
+  const todayKey = keyFor(startOfDay(new Date()));
+  const pace = callPace();
+  const teamSalesToday =
+    personDayStats("varsha", todayKey).sales + personDayStats("siddharth", todayKey).sales;
+
+  if (pace.total >= pace.target) {
+    good.push(`Team hit the ${pace.target}-call goal. That’s Infogrid-level execution — protect the win.`);
+  } else if (pace.onPace) {
+    good.push(
+      `On pace for ${pace.target} calls (avg ${pace.avgPerDay.toFixed(1)}/day). Keep the cadence; best of luck staying ahead.`
+    );
+  } else {
+    bad.push(
+      `Behind pace: need ~${pace.needPerDay.toFixed(1)}/day and you’re averaging ${pace.avgPerDay.toFixed(1)}. Quiet days compound into lost deals.`
+    );
+  }
+
+  if (teamSalesToday > 0) {
+    good.push(`Today’s dials: ${teamSalesToday} sales call(s) logged. Momentum is real — don’t waste it.`);
+  }
+
+  for (const person of ["varsha", "siddharth"]) {
+    const name = PEOPLE[person].name;
+    const s = personDayStats(person, todayKey);
+    if (s.skills > 0) {
+      good.push(
+        `Congrats ${name} — ${s.skills} new skill/learning log(s) today. Best of luck turning that into sharper calls.`
+      );
+    }
+    if (s.connects > 0) {
+      good.push(`Good news: ${name} got ${s.connects} owner connect(s) today. That’s the money conversation.`);
+    }
+    if (s.sales > 0) {
+      good.push(`${name} put in ${s.sales} call(s) today. Respect the grind — best of luck on the next one.`);
+    }
+    if (s.clocked && s.hours > 0) {
+      good.push(`${name} is on the clock (${fmtDuration(s.hours)}). Time invested — make the list pay.`);
+    }
+
+    if (s.sales === 0 && s.openLeads > 0) {
+      bad.push(
+        `${name}: ${s.openLeads} lead(s) still waiting. Not calling is wasted list work — every untouched number is a lost shot at revenue.`
+      );
+    } else if (s.sales === 0 && s.tasks === 0) {
+      bad.push(
+        `${name} hasn’t logged calling or updates today. Effort you skip now is progress you can’t get back this sprint.`
+      );
+    }
+    if (s.openLeads > 8 && s.sales < 3) {
+      bad.push(
+        `${name}: big open queue (${s.openLeads}) vs low dials. Pipeline goes cold — that’s opportunity leaking out.`
+      );
+    }
+    if (!s.clocked && s.sales === 0 && s.skills === 0) {
+      bad.push(
+        `${name}: no clock-in, no calls, no skills posted. The day is burning — remind yourself what silence costs.`
+      );
+    }
+  }
+
+  if (!good.length) {
+    good.push("Fresh board. First call or new skill today earns the first congratulations — go claim it.");
+  }
+  if (!bad.length) {
+    bad.push("No major leaks right now. Stay sharp so we don’t invent wasted hours later.");
+  }
+
+  // Cap length for UI
+  return { good: good.slice(0, 5), bad: bad.slice(0, 5) };
+}
+
+function renderCoach() {
+  if (!els.coachGood || !els.coachBad) return;
+  const { good, bad } = buildCoachBriefing();
+  const todayKey = keyFor(startOfDay(new Date()));
+  const v = personDayStats("varsha", todayKey);
+  const s = personDayStats("siddharth", todayKey);
+  const moodBits = [];
+  if (v.sales + s.sales > 0) moodBits.push("calls moving");
+  if (v.skills + s.skills > 0) moodBits.push("skills landing");
+  if (v.openLeads + s.openLeads > 0 && v.sales + s.sales === 0) moodBits.push("leads going cold");
+  if (els.coachMood) {
+    els.coachMood.textContent = moodBits.length
+      ? `Live brief · ${moodBits.join(" · ")}`
+      : "Live brief · waiting for today’s first move";
+  }
+  els.coachGood.innerHTML = good.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
+  els.coachBad.innerHTML = bad.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
+
+  if (els.coachFlashEl) {
+    if (coachFlash && Date.now() < coachFlashUntil) {
+      els.coachFlashEl.hidden = false;
+      els.coachFlashEl.classList.toggle("is-warn", coachFlash.kind === "bad");
+      els.coachFlashEl.textContent = coachFlash.message;
+    } else {
+      els.coachFlashEl.hidden = true;
+      coachFlash = null;
+    }
+  }
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function renderAll() {
   renderHeader();
   renderToday();
+  renderCalling();
   renderMonth();
   renderLogs();
   renderGoals();
+  renderCoach();
 }
 
 // —— Actions ——
@@ -1112,8 +1647,31 @@ function addTask(person, title, category, outcome = "", area = "") {
     createdAt: new Date().toISOString(),
   });
   persist();
+  const name = PEOPLE[person].name;
+  if (category === "skill" || category === "learning") {
+    celebrate(
+      `Congrats ${name}! New skill “${trimmed}” is locked in. Best of luck using it on the next call.`,
+      "good"
+    );
+  } else if (category === "ads") {
+    celebrate(
+      `Nice work ${name} — ads skill/session “${trimmed}” logged. Best of luck turning spend into pipeline.`,
+      "good"
+    );
+  } else if (category === "sales" && outcome === "connected") {
+    celebrate(
+      `Good news — ${name} connected with an owner on “${trimmed}”. That’s the win. Best of luck closing the loop.`,
+      "good"
+    );
+  } else if (category === "sales") {
+    celebrate(
+      `${name} logged a call on “${trimmed}”${outcome ? ` · ${OUTCOME_LABELS[outcome] || outcome}` : ""}. Keep dialing — luck favors volume.`,
+      "good"
+    );
+  } else {
+    if (els.jarvisLine) els.jarvisLine.textContent = `Logged for ${name}: ${trimmed}`;
+  }
   renderAll();
-  els.jarvisLine.textContent = `Logged for ${PEOPLE[person].name}: ${trimmed}`;
 }
 
 document.querySelectorAll(".task-form").forEach((form) => {
@@ -1146,6 +1704,11 @@ document.querySelectorAll(".person").forEach((card) => {
         form.category.value = "sales";
         form.title.value = btn.dataset.quick || "Cold call";
         form.outcome.focus();
+        return;
+      }
+      if (cat === "skill") {
+        const skill = prompt(`What skill did ${PEOPLE[person].name} add?`, btn.dataset.quick || "");
+        if (skill && skill.trim()) addTask(person, skill.trim(), "skill");
         return;
       }
       addTask(person, btn.dataset.quick, cat);
@@ -1241,51 +1804,157 @@ els.goalForm.addEventListener("submit", (e) => {
   renderHeader();
 });
 
-document.getElementById("syncForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  // Allow pasting full invite { vault, config }
-  maybeParseInvitePaste(els.configInput.value.trim());
-  const vault = els.vaultInput.value.trim();
-  let config;
-  try {
-    const raw = JSON.parse(els.configInput.value);
-    config = raw.config && raw.apiKey === undefined ? raw.config : raw;
-    if (!config.apiKey || !config.databaseURL) {
-      throw new Error("Config must include apiKey and databaseURL");
+
+function xmlEscape(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function excelCell(value, type = "String") {
+  if (type === "Number" && (value === "" || value == null || Number.isNaN(Number(value)))) {
+    return `<Cell><Data ss:Type="String"></Data></Cell>`;
+  }
+  return `<Cell><Data ss:Type="${type}">${xmlEscape(value)}</Data></Cell>`;
+}
+
+function excelRowsForPerson(personKey) {
+  const header = [
+    "Date",
+    "Entry",
+    "Category",
+    "Title",
+    "Outcome",
+    "Area",
+    "Done",
+    "Clock In",
+    "Clock Out",
+    "Duration",
+    "Day Notes",
+  ];
+  const rows = [header];
+  const keys = Object.keys(state.days || {}).sort();
+  for (const dayKey of keys) {
+    const person = state.days[dayKey]?.[personKey];
+    if (!person) continue;
+    const notes = person.notes || "";
+    let wrote = false;
+    for (const t of person.tasks || []) {
+      rows.push([
+        dayKey,
+        "task",
+        t.category || "",
+        t.title || "",
+        OUTCOME_LABELS[t.outcome] || t.outcome || "",
+        t.area || "",
+        t.done ? "yes" : "no",
+        "",
+        "",
+        "",
+        notes,
+      ]);
+      wrote = true;
     }
-  } catch (err) {
-    alert(`Invalid Firebase config: ${err.message}`);
-    return;
+    for (const s of person.sessions || []) {
+      const start = new Date(s.in).getTime();
+      const end = s.out ? new Date(s.out).getTime() : Date.now();
+      const ms = Number.isFinite(start) && Number.isFinite(end) && end >= start ? end - start : 0;
+      rows.push([
+        dayKey,
+        "session",
+        "",
+        "",
+        "",
+        "",
+        "",
+        fmtTime(s.in),
+        s.out ? fmtTime(s.out) : "open",
+        fmtDuration(ms),
+        notes,
+      ]);
+      wrote = true;
+    }
+    if (!wrote && notes.trim()) {
+      rows.push([dayKey, "notes", "", "", "", "", "", "", "", "", notes]);
+    }
   }
+  return rows;
+}
+
+function buildExcelXml() {
+  const sheets = [
+    { name: "Varsha", person: "varsha" },
+    { name: "Siddharth", person: "siddharth" },
+  ];
+  const worksheets = sheets
+    .map(({ name, person }) => {
+      const rows = excelRowsForPerson(person)
+        .map((row) => `<Row>${row.map((cell) => excelCell(cell)).join("")}</Row>`)
+        .join("");
+      return `<Worksheet ss:Name="${xmlEscape(name)}"><Table>${rows}</Table></Worksheet>`;
+    })
+    .join("");
+
+  return `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+${worksheets}
+</Workbook>`;
+}
+
+function downloadExcel() {
+  const xml = buildExcelXml();
+  const blob = new Blob([xml], { type: "application/vnd.ms-excel" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `infogrid-sprint-${keyFor(new Date())}.xls`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  els.jarvisLine.textContent = "Excel downloaded · Sheet1 Varsha · Sheet2 Siddharth";
+}
+
+document.getElementById("exportExcel").onclick = () => downloadExcel();
+
+document.getElementById("downloadCallTemplate").onclick = () => downloadCallTemplate();
+document.getElementById("exportCallLists").onclick = () => exportCallListsExcel();
+
+document.getElementById("importCallSheet").addEventListener("change", async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const hint = document.getElementById("callImportHint");
   try {
-    setSyncUi("live", "CONNECTING…");
-    await connectCloud(config, vault);
-    saveSyncConfig({ config, vault });
-    localStorage.removeItem("infogrid-gate-dismissed");
-    showCloudGate(false);
-    els.jarvisLine.textContent = "Cloud linked · both devices can sync anytime";
+    const append = !!document.getElementById("callAppendMode")?.checked;
+    const lists = await parseCallWorkbook(file);
+    const v = lists.varsha?.length || 0;
+    const s = lists.siddharth?.length || 0;
+    if (!v && !s) throw new Error("No rows found. Check headers and sheets.");
+    applyCallLists(lists, append);
+    if (hint) {
+      hint.textContent = `Imported · Varsha ${v} · Siddharth ${s}${append ? " (appended)" : " (replaced)"}`;
+    }
+    els.jarvisLine.textContent = "Calling lists updated from sheet";
+    switchView("calling");
   } catch (err) {
-    alert(`Could not connect: ${err.message}`);
-    setSyncUi("error", "SYNC ERROR");
+    alert(err.message || "Could not import that sheet.");
+    if (hint) hint.textContent = err.message || "Import failed.";
   }
+  e.target.value = "";
 });
 
-document.getElementById("copyInvite")?.addEventListener("click", copyTeammateInvite);
-document.getElementById("downloadCloudConfig")?.addEventListener("click", downloadCloudConfigFile);
-document.getElementById("gateOpenSync")?.addEventListener("click", () => {
-  document.getElementById("cloudGate").hidden = true;
-  switchView("sync");
+document.querySelectorAll("[data-call-filter]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    callFilter = btn.dataset.callFilter;
+    document.querySelectorAll("[data-call-filter]").forEach((b) => {
+      b.classList.toggle("is-active", b === btn);
+    });
+    renderCalling();
+  });
 });
-document.getElementById("gateDismiss")?.addEventListener("click", () => {
-  localStorage.setItem("infogrid-gate-dismissed", "1");
-  showCloudGate(false);
-});
-
-document.getElementById("disconnectSync").onclick = () => {
-  if (!confirm("Disconnect cloud sync on this device?")) return;
-  disconnectCloud();
-  showCloudGate(true);
-};
 
 document.getElementById("exportData").onclick = () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
@@ -1314,7 +1983,7 @@ document.getElementById("importData").addEventListener("change", async (e) => {
 
 document.getElementById("clearData").onclick = async () => {
   if (!confirm("Purge ALL tracker data? This clears local and the cloud vault if connected.")) return;
-  state = { days: {}, goals: structuredClone(DEFAULT_GOALS), updatedAt: Date.now() };
+  state = { days: {}, goals: structuredClone(DEFAULT_GOALS), callLists: { varsha: [], siddharth: [] }, updatedAt: Date.now() };
   saveLocal();
   if (dbRef) {
     try {
@@ -1337,6 +2006,10 @@ document.getElementById("clearData").onclick = async () => {
   selectedDate = clampToSprint(startOfDay(new Date()));
   calendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
   els.sprintRange.textContent = `${fmtShort(SPRINT_START)} – ${fmtShort(SPRINT_END)}, ${SPRINT_END.getFullYear()}`;
+  const hint = document.querySelector(".sprint-today-hint");
+  if (hint) {
+    hint.textContent = `Today is ${fmtLong(startOfDay(new Date()))} · use Today tab date bar to log`;
+  }
   if (els.callRing) {
     els.callRing.style.strokeDasharray = String(CALL_RING);
     els.callRing.style.strokeDashoffset = String(CALL_RING);
@@ -1349,7 +2022,10 @@ document.getElementById("clearData").onclick = async () => {
 
   setInterval(() => {
     els.liveClock.textContent = new Date().toLocaleTimeString("en-GB", { hour12: false });
+    tickCountdowns();
+    if (coachFlash && Date.now() >= coachFlashUntil) renderCoach();
   }, 1000);
+  tickCountdowns();
   setInterval(() => {
     els.jarvisLine.textContent =
       STATUS_LINES[Math.floor(Math.random() * STATUS_LINES.length)];
@@ -1365,9 +2041,12 @@ document.getElementById("clearData").onclick = async () => {
       }
     }
   }, 1000);
+
+  // Paint today immediately (don't wait on cloud reconnect)
+  renderAll();
 })();
 
-// Auto-reconnect: localStorage invite, or hosted cloud-config.json
+// Silent cloud reconnect (no Sync UI) if config already saved / hosted
 (async () => {
   let saved = loadSyncConfig();
   if (!saved?.config || !saved?.vault) {
@@ -1375,24 +2054,18 @@ document.getElementById("clearData").onclick = async () => {
     if (hosted) {
       saved = hosted;
       saveSyncConfig(hosted);
-      els.vaultInput.value = hosted.vault;
-      els.configInput.value = JSON.stringify(hosted.config, null, 2);
     }
   }
   if (saved?.config && saved?.vault) {
-    els.vaultInput.value = saved.vault;
-    els.configInput.value = JSON.stringify(saved.config, null, 2);
     try {
       setSyncUi("live", "CONNECTING…");
       await connectCloud(saved.config, saved.vault);
-      showCloudGate(false);
     } catch (err) {
-      setSyncUi("error", "SYNC ERROR");
-      els.syncHint.textContent = `Reconnect failed: ${err.message}`;
-      showCloudGate(true);
+      console.warn("Cloud reconnect failed", err);
+      setSyncUi("", "COACH ON");
     }
   } else {
-    showCloudGate(true);
+    setSyncUi("", "COACH ON");
   }
   renderAll();
 })();
