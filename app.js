@@ -1845,6 +1845,8 @@ function setCoachOpen(open) {
   if (open) {
     coachUnread = 0;
     if (els.coachBadge) els.coachBadge.hidden = true;
+    const toast = document.getElementById("coachToast");
+    if (toast) toast.hidden = true;
   }
 }
 
@@ -1861,11 +1863,23 @@ function bumpCoachBadge() {
   els.coachBadge.textContent = String(Math.min(coachUnread, 9));
 }
 
+function showCoachToast(message) {
+  const toast = document.getElementById("coachToast");
+  if (!toast) return;
+  toast.hidden = false;
+  toast.textContent = String(message || "").slice(0, 160);
+  clearTimeout(showCoachToast._timer);
+  showCoachToast._timer = setTimeout(() => {
+    toast.hidden = true;
+  }, 7000);
+}
+
 function celebrate(message, kind = "good") {
   coachFlash = { message, kind };
   coachFlashUntil = Date.now() + 20000;
   if (els.jarvisLine) els.jarvisLine.textContent = message;
   bumpCoachBadge();
+  showCoachToast(message);
   setCoachOpen(true);
   renderCoach();
 }
