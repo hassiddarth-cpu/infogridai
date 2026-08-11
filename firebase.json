@@ -1,0 +1,19 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "infogridai/**",
+      "package.json",
+      "package-lock.json",
+      "README.md",
+      "CURSOR-PROMPT.txt",
+      "ONE-PROMPT.txt",
+      "SAY-THIS.txt",
+      "TRANSFER.txt",
+      "OTHER-DEVICE.md"
+    ]
+  }
+}

@@ -6,7 +6,7 @@ Shared sprint tracker for **Infogrid AI** — Varsha & Siddharth.
 - Daily cold-call logging (connected, busy, voicemail, failed, gatekeeper + area)
 - Clock in / clock out with live hours
 - 200-call pace, month grid, analytics, goals
-- Free multi-device sync: Netlify Drop + Firebase Spark
+- Free multi-device sync: Firebase Spark + Firebase Hosting (or GitHub Pages if repo is public)
 
 ## Local run
 ```bash
@@ -32,14 +32,22 @@ Read CURSOR-PROMPT.txt and do everything in it. Walk me through free Firebase + 
 
 ## Deploy (free — no credit card)
 
-**Public URL:** https://hassiddarth-cpu.github.io/infogridai/
+**Private repo?** GitHub Pages needs a **public** repo on the free plan. Use **Firebase Hosting** instead (Spark / free — you already have the project).
 
-Hosted on **GitHub Pages** (deploy from branch `main` / root).
+### Firebase Hosting (recommended)
+**Public URL after deploy:** `https://infogrid-dd53b.web.app`
 
-`cloud-config.json` is in the repo so both devices auto-connect (**CLOUD LIVE**) from the public URL. Firebase web config is public-by-design.
+One-time in Terminal:
+```bash
+cd infogridai
+npm install -g firebase-tools
+firebase login
+firebase deploy --only hosting
+```
 
-### One-time (you click — ~30 seconds)
-1. Open https://github.com/hassiddarth-cpu/infogridai/settings/pages
-2. **Build and deployment → Source:** Deploy from a branch
-3. **Branch:** `main` · folder **`/ (root)`** → **Save**
-4. Wait 1–2 min, then open the URL above
+`cloud-config.json` is deployed with the site — both devices get **CLOUD LIVE** automatically.
+
+### GitHub Pages (only if repo is public)
+1. Settings → General → **Change visibility → Public**
+2. Settings → Pages → branch `main` / root → Save
+3. URL: https://hassiddarth-cpu.github.io/infogridai/
