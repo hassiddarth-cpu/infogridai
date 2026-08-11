@@ -84,7 +84,7 @@
       <button class="tab rail-btn is-active" data-view="today">Today</button>
       <button class="tab rail-btn" data-view="calling">Calling</button>
       <button class="tab rail-btn" data-view="month">Month</button>
-      <button class="tab rail-btn" data-view="logs">Analytics</button>
+      <button class="tab rail-btn" data-view="logs">Overall Stats</button>
       <button class="tab rail-btn" data-view="goals">Goals</button>
       <button class="tab rail-btn" data-view="backup">Backup</button>
     </nav>
@@ -262,19 +262,24 @@
 
     <section class="view" id="view-logs" hidden>
       <div class="logs-head">
-        <h2>Analytics</h2>
-        <p>Full sprint graphs · pace, outcomes, areas, hours, team.</p>
+        <h2>Overall Stats</h2>
+        <p>Full sprint dashboard · every metric as graphs.</p>
       </div>
       <div class="avg-board" id="avgBoard"></div>
       <div class="logs-kpis" id="logsKpis"></div>
       <div class="chart-grid chart-grid--analytics">
-        <div class="glass-panel wide"><h3>Call trend</h3><div id="monthlyCallsChart" class="chart-host"></div></div>
+        <div class="glass-panel wide"><h3>14-day call trend</h3><div id="monthlyCallsChart" class="chart-host chart-host--tall"></div></div>
+        <div class="glass-panel wide"><h3>Cumulative calls (sprint)</h3><div id="cumulativeChart" class="chart-host chart-host--tall"></div></div>
         <div class="glass-panel"><h3>Outcomes mix</h3><div id="outcomesBreakdown" class="chart-host"></div></div>
         <div class="glass-panel"><h3>Team scoreboard</h3><div id="operatorCompare" class="chart-host"></div></div>
         <div class="glass-panel"><h3>By area</h3><div id="areaBreakdown" class="chart-host"></div></div>
         <div class="glass-panel"><h3>Hours by person</h3><div id="hoursChart" class="chart-host"></div></div>
         <div class="glass-panel"><h3>Pace vs need</h3><div id="paceChart" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Skills & ads</h3><div id="skillsChart" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Calling list health</h3><div id="listHealthChart" class="chart-host"></div></div>
+        <div class="glass-panel"><h3>Connect rate by person</h3><div id="connectRateChart" class="chart-host"></div></div>
         <div class="glass-panel wide"><h3>Stage funnel</h3><div id="funnelChart" class="chart-host"></div></div>
+        <div class="glass-panel wide"><h3>Weekly stacked calls</h3><div id="weeklyStackChart" class="chart-host chart-host--tall"></div></div>
         <div class="glass-panel wide"><h3>Activity</h3><ul class="feed" id="activityFeed"></ul></div>
       </div>
     </section>
@@ -376,31 +381,36 @@
   </div>
 
 
-  <div class="coach-dock" id="coachDock">
+  <div class="coach-dock" id="coachDock" aria-live="polite">
     <div class="coach-panel" id="aiCoach" hidden>
       <div class="ai-coach-head">
-        <div class="ai-avatar" aria-hidden="true">AI</div>
+        <div class="ai-avatar" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="28" height="28"><circle cx="24" cy="18" r="10" fill="#061018"/><rect x="10" y="26" width="28" height="16" rx="6" fill="#061018"/><circle cx="19" cy="17" r="2.2" fill="#4aa3ff"/><circle cx="29" cy="17" r="2.2" fill="#ff5ec8"/><rect x="18" y="33" width="12" height="3" rx="1.5" fill="#3dd68c"/><circle cx="24" cy="6" r="2" fill="#061018"/><rect x="23" y="6" width="2" height="4" fill="#061018"/></svg>
+        </div>
         <div>
           <h2>Infogrid Coach</h2>
-          <p class="ai-mood" id="coachMood">Tap for brief…</p>
+          <p class="ai-mood" id="coachMood">Read-only assistant</p>
         </div>
         <button type="button" class="coach-close" id="coachClose" aria-label="Close">×</button>
       </div>
-      <p class="ai-flash" id="coachFlash" hidden></p>
-      <div class="ai-coach-grid">
-        <article class="ai-card ai-card--good">
-          <h3>Good news</h3>
-          <ul id="coachGood"></ul>
-        </article>
-        <article class="ai-card ai-card--bad">
-          <h3>Reality check</h3>
-          <ul id="coachBad"></ul>
-        </article>
-      </div>
+      <div class="coach-chat" id="coachChat"></div>
+      <p class="coach-chat-note">No typing — coach only posts updates.</p>
     </div>
     <button type="button" class="coach-fab" id="coachFab" aria-label="Open Infogrid Coach">
-      <span>AI</span>
-      <small>Coach</small>
+      <span class="coach-badge" id="coachBadge" hidden>1</span>
+      <svg class="coach-robot" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="30" fill="url(#cg)" opacity="0.25"/>
+        <defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4aa3ff"/><stop offset="1" stop-color="#ff5ec8"/></linearGradient></defs>
+        <rect x="14" y="22" width="36" height="28" rx="10" fill="#0b1224" stroke="#fff" stroke-width="2"/>
+        <circle cx="32" cy="18" r="10" fill="#0b1224" stroke="#fff" stroke-width="2"/>
+        <circle cx="27" cy="17" r="2.5" fill="#4aa3ff"/>
+        <circle cx="37" cy="17" r="2.5" fill="#ff5ec8"/>
+        <rect x="24" y="34" width="16" height="4" rx="2" fill="#3dd68c"/>
+        <circle cx="32" cy="8" r="2.5" fill="#fff"/>
+        <rect x="31" y="8" width="2" height="5" fill="#fff"/>
+        <rect x="10" y="30" width="5" height="12" rx="2" fill="#fff"/>
+        <rect x="49" y="30" width="5" height="12" rx="2" fill="#fff"/>
+      </svg>
     </button>
   </div>
 

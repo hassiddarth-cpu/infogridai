@@ -74,6 +74,7 @@ let state = {
 let callFilter = "all";
 let coachFlash = null;
 let coachFlashUntil = 0;
+let coachUnread = 0;
 let selectedDate = startOfDay(new Date());
 let calendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
 let els = {
@@ -107,9 +108,8 @@ let els = {
   vaultInput: document.getElementById("vaultInput"),
   configInput: document.getElementById("configInput"),
   coachMood: document.getElementById("coachMood"),
-  coachGood: document.getElementById("coachGood"),
-  coachBad: document.getElementById("coachBad"),
-  coachFlashEl: document.getElementById("coachFlash"),
+  coachChat: document.getElementById("coachChat"),
+  coachBadge: document.getElementById("coachBadge"),
   liveClock: document.getElementById("liveClock"),
   jarvisLine: document.getElementById("jarvisLine"),
   cdMonth: document.getElementById("cdMonth"),
@@ -1300,6 +1300,59 @@ function renderLogs() {
     ]);
   }
 
+  const cumEl = document.getElementById("cumulativeChart");
+  if (cumEl) {
+    const cum = cumulativeSalesSeries();
+    cumEl.innerHTML = svgLineSeries([
+      { name: "Varsha", color: "#4aa3ff", points: cum.varsha },
+      { name: "Siddharth", color: "#ff5ec8", points: cum.siddharth },
+      { name: "Team", color: "#3dd68c", points: cum.total },
+    ]);
+  }
+
+  const skillsEl = document.getElementById("skillsChart");
+  if (skillsEl) {
+    skillsEl.innerHTML = svgDualBars([
+      {
+        label: "Skills",
+        a: countCategory("varsha", "skill") + countCategory("varsha", "learning"),
+        b: countCategory("siddharth", "skill") + countCategory("siddharth", "learning"),
+      },
+      {
+        label: "Ads",
+        a: countCategory("varsha", "ads"),
+        b: countCategory("siddharth", "ads"),
+      },
+    ]);
+  }
+
+  const listEl = document.getElementById("listHealthChart");
+  if (listEl) {
+    const vL = state.callLists?.varsha || [];
+    const sL = state.callLists?.siddharth || [];
+    listEl.innerHTML = svgDualBars([
+      { label: "Open", a: vL.filter((l) => !l.stage).length, b: sL.filter((l) => !l.stage).length },
+      { label: "Staged", a: vL.filter((l) => !!l.stage).length, b: sL.filter((l) => !!l.stage).length },
+      { label: "Owner", a: vL.filter((l) => l.stage === "connected").length, b: sL.filter((l) => l.stage === "connected").length },
+    ]);
+  }
+
+  const rateEl = document.getElementById("connectRateChart");
+  if (rateEl) {
+    const vRate = vSales ? Math.round((countOutcomePerson("varsha", "connected") / vSales) * 100) : 0;
+    const sRate = sSales ? Math.round((countOutcomePerson("siddharth", "connected") / sSales) * 100) : 0;
+    rateEl.innerHTML = svgHBars([
+      { label: "Varsha %", value: vRate, color: "#4aa3ff" },
+      { label: "Sid %", value: sRate, color: "#ff5ec8" },
+      { label: "Team %", value: conversion, color: "#3dd68c" },
+    ]);
+  }
+
+  const weekEl = document.getElementById("weeklyStackChart");
+  if (weekEl) {
+    weekEl.innerHTML = svgWeeklyStack(weeklySalesBuckets());
+  }
+
   const feed = allActivity();
   if (els.activityFeed) {
     els.activityFeed.innerHTML = feed.length
@@ -1336,6 +1389,45 @@ function dailySalesSeries(days = 14) {
     total.push(v + s);
   }
   return { varsha, siddharth, total };
+}
+
+
+function cumulativeSalesSeries() {
+  const days = dailySalesSeries(21);
+  const out = { varsha: [], siddharth: [], total: [] };
+  let av = 0, as_ = 0, at = 0;
+  for (let i = 0; i < days.varsha.length; i++) {
+    av += days.varsha[i];
+    as_ += days.siddharth[i];
+    at += days.total[i];
+    out.varsha.push(av);
+    out.siddharth.push(as_);
+    out.total.push(at);
+  }
+  return out;
+}
+
+function weeklySalesBuckets() {
+  const buckets = [];
+  const end = startOfDay(new Date());
+  for (let w = 5; w >= 0; w--) {
+    let v = 0, s = 0;
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(end);
+      day.setDate(end.getDate() - (w * 7 + d));
+      const k = keyFor(day);
+      const data = state.days[k];
+      if (!data) continue;
+      v += data.varsha.tasks.filter((t) => t.category === "sales").length;
+      s += data.siddharth.tasks.filter((t) => t.category === "sales").length;
+    }
+    buckets.push({ label: `W-${w === 0 ? "now" : w}`, a: v, b: s });
+  }
+  return buckets;
+}
+
+function svgWeeklyStack(buckets) {
+  return svgDualBars(buckets);
 }
 
 function renderGoals() {
@@ -1750,12 +1842,30 @@ function setCoachOpen(open) {
   if (!panel) return;
   panel.hidden = !open;
   if (fab) fab.classList.toggle("is-open", !!open);
+  if (open) {
+    coachUnread = 0;
+    if (els.coachBadge) els.coachBadge.hidden = true;
+  }
+}
+
+function bumpCoachBadge() {
+  coachUnread += 1;
+  if (!els.coachBadge) return;
+  const panel = document.getElementById("aiCoach");
+  if (panel && !panel.hidden) {
+    els.coachBadge.hidden = true;
+    coachUnread = 0;
+    return;
+  }
+  els.coachBadge.hidden = false;
+  els.coachBadge.textContent = String(Math.min(coachUnread, 9));
 }
 
 function celebrate(message, kind = "good") {
   coachFlash = { message, kind };
-  coachFlashUntil = Date.now() + 16000;
+  coachFlashUntil = Date.now() + 20000;
   if (els.jarvisLine) els.jarvisLine.textContent = message;
+  bumpCoachBadge();
   setCoachOpen(true);
   renderCoach();
 }
@@ -1894,7 +2004,8 @@ function buildCoachBriefing() {
 }
 
 function renderCoach() {
-  if (!els.coachGood || !els.coachBad) return;
+  const chat = els.coachChat || document.getElementById("coachChat");
+  if (!chat) return;
   const { good, bad } = buildCoachBriefing();
   const todayKey = keyFor(startOfDay(new Date()));
   const v = personDayStats("varsha", todayKey);
@@ -1905,22 +2016,24 @@ function renderCoach() {
   if (v.openLeads + s.openLeads > 0 && v.sales + s.sales === 0) moodBits.push("leads going cold");
   if (els.coachMood) {
     els.coachMood.textContent = moodBits.length
-      ? `Live brief · ${moodBits.join(" · ")}`
-      : "Live brief · waiting for today’s first move";
+      ? `Live · ${moodBits.join(" · ")}`
+      : "Live · waiting for today’s first move";
   }
-  els.coachGood.innerHTML = good.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
-  els.coachBad.innerHTML = bad.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
 
-  if (els.coachFlashEl) {
-    if (coachFlash && Date.now() < coachFlashUntil) {
-      els.coachFlashEl.hidden = false;
-      els.coachFlashEl.classList.toggle("is-warn", coachFlash.kind === "bad");
-      els.coachFlashEl.textContent = coachFlash.message;
-    } else {
-      els.coachFlashEl.hidden = true;
-      coachFlash = null;
-    }
+  const bubbles = [];
+  bubbles.push(`<div class="coach-bubble coach-bubble--bot"><small>Coach</small>Hi — I’m Infogrid Coach. I only post updates (no typing). Here’s your brief.</div>`);
+  if (coachFlash && Date.now() < coachFlashUntil) {
+    const cls = coachFlash.kind === "bad" ? "coach-bubble--bad" : "coach-bubble--flash";
+    bubbles.push(`<div class="coach-bubble coach-bubble--bot ${cls}"><small>Update</small>${escapeHtml(coachFlash.message)}</div>`);
   }
+  for (const line of good) {
+    bubbles.push(`<div class="coach-bubble coach-bubble--bot coach-bubble--good"><small>Good news</small>${escapeHtml(line)}</div>`);
+  }
+  for (const line of bad) {
+    bubbles.push(`<div class="coach-bubble coach-bubble--bot coach-bubble--bad"><small>Reality check</small>${escapeHtml(line)}</div>`);
+  }
+  chat.innerHTML = bubbles.join("");
+  chat.scrollTop = chat.scrollHeight;
 }
 
 function escapeHtml(str) {
@@ -2359,8 +2472,16 @@ document.getElementById("clearData").onclick = async () => {
     }
   }, 1000);
 
+
+  // Keep robot coach fixed on viewport even if layouts change
+  const dock = document.getElementById("coachDock");
+  if (dock && dock.parentElement !== document.body) {
+    document.body.appendChild(dock);
+  }
   // Paint today immediately (don't wait on cloud reconnect)
   renderAll();
+  setCoachOpen(false);
+
 })();
 
 // Silent cloud reconnect (no Sync UI) if config already saved / hosted
