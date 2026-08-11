@@ -2047,14 +2047,15 @@ function renderCoach() {
   if (coachFlash && Date.now() < coachFlashUntil) {
     const cls = coachFlash.kind === "bad" ? "coach-bubble--bad" : "coach-bubble--flash";
     bubbles.push(`<div class="coach-bubble coach-bubble--bot ${cls}"><small>Update</small>${escapeHtml(coachFlash.message)}</div>`);
-  } else {
-    bubbles.push(`<div class="coach-bubble coach-bubble--bot"><small>Coach</small>Tap for a quick brief. Updates also pop above this button for a few seconds.</div>`);
   }
-  for (const line of good.slice(0, 2)) {
+  for (const line of good.slice(0, 1)) {
     bubbles.push(`<div class="coach-bubble coach-bubble--bot coach-bubble--good"><small>Good news</small>${escapeHtml(line)}</div>`);
   }
-  for (const line of bad.slice(0, 2)) {
+  for (const line of bad.slice(0, 1)) {
     bubbles.push(`<div class="coach-bubble coach-bubble--bot coach-bubble--bad"><small>Reality check</small>${escapeHtml(line)}</div>`);
+  }
+  if (!bubbles.length) {
+    bubbles.push(`<div class="coach-bubble coach-bubble--bot"><small>Coach</small>Waiting on today’s first move. Updates also pop above this button.</div>`);
   }
   chat.innerHTML = bubbles.join("");
   chat.scrollTop = chat.scrollHeight;

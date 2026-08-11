@@ -159,10 +159,10 @@ a:hover { text-decoration: underline; }
   letter-spacing: 0.02em;
 }
 
-/* Hero tiles — same glass as pace bar; kickers like Agency sprint */
+/* Hero tiles — same card language as Infogrid Coach bubbles */
 .hero-metrics {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.55rem;
   width: 100%;
   max-width: 560px;
   margin: 0 auto 0.85rem;
@@ -179,53 +179,44 @@ a:hover { text-decoration: underline; }
   margin-bottom: 1.15rem;
 }
 .hero-tile {
-  padding: 0.85rem 0.9rem;
-  border-radius: 18px;
-  border: 1px solid var(--line);
-  background: linear-gradient(135deg, rgba(74,163,255,0.06), rgba(255,94,200,0.04));
-  text-align: center;
+  padding: 0.7rem 0.8rem;
+  border-radius: 14px 14px 14px 4px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.06);
+  text-align: left;
 }
 .hero-tile--month {
-  border-color: rgba(74, 163, 255, 0.22);
-  background: linear-gradient(135deg, rgba(74,163,255,0.12), rgba(255,255,255,0.02));
+  border-color: rgba(74, 163, 255, 0.28);
+  background: rgba(74, 163, 255, 0.1);
 }
 .hero-tile--year {
-  border-color: rgba(255, 94, 200, 0.22);
-  background: linear-gradient(135deg, rgba(255,94,200,0.1), rgba(255,255,255,0.02));
+  border-color: rgba(255, 94, 200, 0.28);
+  background: rgba(255, 94, 200, 0.1);
 }
 .hero-tile__kicker {
   display: block;
-  margin: 0 0 0.35rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
+  margin: 0 0 0.28rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--sid);
-}
-.hero-tile--month .hero-tile__kicker { color: var(--varsha); }
-.hero-tile--year .hero-tile__kicker { color: var(--sid); }
-.hero-metrics--daily .hero-tile__kicker,
-.hero-metrics--more .hero-tile__kicker {
   color: var(--muted);
-  letter-spacing: 0.1em;
 }
+.hero-tile--month .hero-tile__kicker { color: rgba(157, 208, 255, 0.9); }
+.hero-tile--year .hero-tile__kicker { color: rgba(255, 176, 224, 0.9); }
 .hero-tile__value {
   display: block;
-  font-size: 0.98rem;
+  font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  line-height: 1.25;
-  color: #eef2ff;
+  line-height: 1.35;
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 .hero-metrics--time .hero-tile__value {
-  font-family: var(--display);
-  font-size: clamp(1.05rem, 2.6vw, 1.25rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
-.hero-tile--month .hero-tile__value { color: #c5e2ff; }
-.hero-tile--year .hero-tile__value { color: #ffc6e8; }
 
 .bday-line {
   display: block;
@@ -272,10 +263,9 @@ a:hover { text-decoration: underline; }
 }
 
 @media (max-width: 560px) {
-  .hero-metrics { gap: 0.5rem; }
-  .hero-tile { padding: 0.7rem 0.45rem; }
-  .hero-tile__kicker { font-size: 0.62rem; letter-spacing: 0.08em; }
-  .hero-tile__value { font-size: 0.88rem; }
+  .hero-metrics { gap: 0.45rem; }
+  .hero-tile { padding: 0.65rem 0.7rem; }
+  .hero-tile__value { font-size: 0.84rem; }
 }
 
 .pace-bar-wrap {
@@ -883,7 +873,12 @@ a:hover { text-decoration: underline; }
   0%, 100% { box-shadow: 0 14px 40px rgba(0,0,0,0.55), 0 0 0 6px rgba(74,163,255,0.18); }
   50% { box-shadow: 0 14px 40px rgba(0,0,0,0.55), 0 0 0 10px rgba(255,94,200,0.22); }
 }
-.coach-fab.is-open { animation: none; outline: 2px solid #fff; }
+.coach-fab.is-open {
+  animation: none;
+  border-color: rgba(255,255,255,0.7);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.55), 0 0 0 3px rgba(74,163,255,0.28);
+  outline: none;
+}
 .coach-fab-logo {
   width: 48px;
   height: 48px;
@@ -898,7 +893,7 @@ a:hover { text-decoration: underline; }
   padding: 0.65rem 0.8rem;
   border-radius: 14px 14px 4px 14px;
   background: rgba(10, 14, 28, 0.96);
-  border: 1px solid rgba(74,163,255,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
   color: #f2f5ff;
   font-size: 0.8rem;
   line-height: 1.35;
@@ -910,20 +905,19 @@ a:hover { text-decoration: underline; }
 }
 .coach-toast small {
   font-size: 0.65rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 700;
 }
 .coach-toast.is-warn {
-  border-color: rgba(255,107,122,0.45);
-  background: rgba(40, 12, 18, 0.96);
+  border-color: rgba(255,107,122,0.35);
 }
 .coach-toast[hidden] { display: none !important; }
 .ai-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -931,24 +925,15 @@ a:hover { text-decoration: underline; }
   flex-shrink: 0;
 }
 .ai-avatar-icon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   object-fit: cover;
   object-position: center 12%;
   mix-blend-mode: lighten;
   display: block;
 }
 .coach-composer {
-  margin-top: 0.45rem;
-  padding: 0.65rem 0.75rem;
-  border-radius: 14px;
-  border: 1px dashed rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.03);
-  color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-align: center;
-  flex-shrink: 0;
+  display: none;
 }
 .coach-badge {
   position: absolute;
@@ -969,12 +954,12 @@ a:hover { text-decoration: underline; }
 .coach-badge[hidden] { display: none !important; }
 .coach-panel {
   width: min(300px, calc(100vw - 5.5rem));
-  max-height: 280px;
+  max-height: 260px;
   display: flex;
   flex-direction: column;
   padding: 0.7rem 0.75rem 0.65rem;
   border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.16);
+  border: 1px solid rgba(255,255,255,0.14);
   background: rgba(8, 12, 24, 0.97);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -986,8 +971,6 @@ a:hover { text-decoration: underline; }
   max-height: 220px;
   width: min(280px, calc(100vw - 5.5rem));
 }
-.coach-panel.is-compact .coach-composer { display: none; }
-.coach-panel.is-compact .coach-chat { max-height: 140px; }
 .coach-panel[hidden] { display: none !important; }
 .ai-coach-head {
   display: flex;
@@ -1024,52 +1007,43 @@ a:hover { text-decoration: underline; }
   overflow: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
-  padding: 0.15rem 0.1rem 0.4rem;
-  min-height: 180px;
+  gap: 0.5rem;
+  padding: 0.1rem 0 0.2rem;
+  min-height: 0;
+  max-height: 160px;
 }
 .coach-bubble {
-  max-width: 92%;
+  max-width: 100%;
   padding: 0.65rem 0.75rem;
   border-radius: 14px 14px 14px 4px;
   font-size: 0.84rem;
   line-height: 1.4;
   font-weight: 550;
-}
-.coach-bubble--bot {
-  align-self: flex-start;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.1);
   color: var(--text);
 }
+.coach-bubble--bot { align-self: stretch; }
 .coach-bubble--good {
-  border-color: rgba(61,214,140,0.35);
-  background: rgba(61,214,140,0.12);
+  border-color: rgba(61,214,140,0.28);
+  background: rgba(61,214,140,0.08);
 }
 .coach-bubble--bad {
-  border-color: rgba(255,107,122,0.4);
-  background: rgba(255,107,122,0.12);
+  border-color: rgba(255,107,122,0.28);
+  background: rgba(255,107,122,0.08);
 }
 .coach-bubble--flash {
-  border-color: rgba(74,163,255,0.45);
-  background: rgba(74,163,255,0.14);
-  font-weight: 700;
+  border-color: rgba(74,163,255,0.3);
+  background: rgba(74,163,255,0.1);
 }
 .coach-bubble small {
   display: block;
   margin-bottom: 0.25rem;
   font-size: 0.68rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 700;
-}
-.coach-chat-note {
-  margin: 0.35rem 0 0;
-  font-size: 0.7rem;
-  color: var(--muted);
-  text-align: center;
-  flex-shrink: 0;
 }
 .chart-host--tall { min-height: 200px; }
 
