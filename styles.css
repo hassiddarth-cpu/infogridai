@@ -159,50 +159,44 @@ a:hover { text-decoration: underline; }
   letter-spacing: 0.02em;
 }
 
-/* Month / Year boxes — above sprint ring */
-.countdown-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
-  width: 100%;
-  max-width: 520px;
-  margin: 0 auto 1rem;
-}
-.countdown {
-  padding: 0.85rem 0.9rem;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.035);
-  text-align: center;
-}
-.countdown--month {
-  border-color: rgba(74, 163, 255, 0.28);
-  background: linear-gradient(165deg, rgba(74,163,255,0.14), rgba(255,255,255,0.02));
-}
-.countdown--year {
-  border-color: rgba(255, 94, 200, 0.28);
-  background: linear-gradient(165deg, rgba(255,94,200,0.12), rgba(255,255,255,0.02));
-}
-.countdown-label {
-  display: block;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+/* Same voice as “Agency sprint · Aug–Sep 2026” */
+.hero-meta-line {
+  margin: 0 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  color: var(--sid);
+  line-height: 1.55;
+}
+.hero-meta-line--below {
+  margin: 0 0 0.35rem;
+  color: var(--varsha);
+}
+.hero-meta-line--soft {
+  margin: 0 0 1.15rem;
   color: var(--muted);
-  margin-bottom: 0.3rem;
+  letter-spacing: 0.1em;
 }
-.countdown-value {
-  display: block;
-  font-family: var(--display);
-  font-size: clamp(1.05rem, 2.8vw, 1.28rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
+.meta-dot {
+  opacity: 0.45;
+  font-weight: 500;
+}
+.meta-pair b {
+  font-weight: 700;
+  letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
-  line-height: 1.15;
+  color: #f2f5ff;
 }
-.countdown--month .countdown-value { color: #9fd0ff; }
-.countdown--year .countdown-value { color: #ffb0e0; }
+.meta-pair--month { color: var(--varsha); }
+.meta-pair--year { color: var(--sid); }
+.meta-pair--month b { color: #c5e2ff; }
+.meta-pair--year b { color: #ffc6e8; }
 
 .bday-line {
   display: block;
@@ -218,7 +212,7 @@ a:hover { text-decoration: underline; }
   position: relative;
   width: 148px;
   height: 148px;
-  margin: 0.1rem auto 1.1rem;
+  margin: 0.1rem auto 1rem;
   filter: drop-shadow(0 0 24px rgba(74, 163, 255, 0.16));
 }
 .ring { position: absolute; inset: 0; transform: rotate(-90deg); }
@@ -248,55 +242,12 @@ a:hover { text-decoration: underline; }
   letter-spacing: 0.16em; font-weight: 600;
 }
 
-/* Below sprint ring — daily + other boxes */
-.stat-row {
-  display: grid;
-  gap: 0.55rem;
-  width: 100%;
-  max-width: 640px;
-  margin: 0 auto 0.55rem;
-}
-.stat-row--primary {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.stat-row--secondary {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-bottom: 1.1rem;
-}
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.75rem 0.55rem;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgba(255,255,255,0.035);
-  text-align: center;
-}
-.stat-label {
-  font-size: 0.64rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.stat-value {
-  font-family: var(--display);
-  font-size: clamp(0.95rem, 2.4vw, 1.15rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  color: #f5f7ff;
-}
-.stat-row--secondary .stat-value {
-  font-size: clamp(0.88rem, 2.2vw, 1.05rem);
-  font-weight: 700;
-}
-
 @media (max-width: 560px) {
-  .countdown-row { gap: 0.5rem; }
-  .countdown { padding: 0.7rem 0.55rem; }
-  .stat { padding: 0.65rem 0.4rem; }
+  .hero-meta-line {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    gap: 0.25rem 0.4rem;
+  }
 }
 
 .pace-bar-wrap {
