@@ -926,17 +926,30 @@ a:hover { text-decoration: underline; }
   border-radius: 50%;
 }
 .coach-toast {
-  max-width: min(280px, calc(100vw - 5.5rem));
-  padding: 0.7rem 0.85rem;
+  max-width: min(260px, calc(100vw - 5.5rem));
+  padding: 0.65rem 0.8rem;
   border-radius: 14px 14px 4px 14px;
   background: rgba(10, 14, 28, 0.96);
   border: 1px solid rgba(74,163,255,0.35);
   color: #f2f5ff;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   line-height: 1.35;
   font-weight: 600;
   box-shadow: 0 12px 36px rgba(0,0,0,0.45);
   animation: rise 0.28s var(--ease) both;
+  display: grid;
+  gap: 0.25rem;
+}
+.coach-toast small {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+.coach-toast.is-warn {
+  border-color: rgba(255,107,122,0.45);
+  background: rgba(40, 12, 18, 0.96);
 }
 .coach-toast[hidden] { display: none !important; }
 .ai-avatar {
@@ -987,20 +1000,26 @@ a:hover { text-decoration: underline; }
 }
 .coach-badge[hidden] { display: none !important; }
 .coach-panel {
-  width: min(380px, calc(100vw - 1.5rem));
-  max-height: min(70vh, 520px);
+  width: min(300px, calc(100vw - 5.5rem));
+  max-height: 280px;
   display: flex;
   flex-direction: column;
-  padding: 0.85rem 0.9rem 0.75rem;
-  border-radius: 22px;
+  padding: 0.7rem 0.75rem 0.65rem;
+  border-radius: 18px;
   border: 1px solid rgba(255,255,255,0.16);
   background: rgba(8, 12, 24, 0.97);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
   text-align: left;
   animation: rise 0.28s var(--ease) both;
 }
+.coach-panel.is-compact {
+  max-height: 220px;
+  width: min(280px, calc(100vw - 5.5rem));
+}
+.coach-panel.is-compact .coach-composer { display: none; }
+.coach-panel.is-compact .coach-chat { max-height: 140px; }
 .coach-panel[hidden] { display: none !important; }
 .ai-coach-head {
   display: flex;

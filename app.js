@@ -75,6 +75,7 @@ let callFilter = "all";
 let coachFlash = null;
 let coachFlashUntil = 0;
 let coachUnread = 0;
+let coachAutoCloseTimer = null;
 let selectedDate = startOfDay(new Date());
 let calendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
 let els = {
@@ -1836,17 +1837,23 @@ function exportCallListsExcel() {
 }
 
 
-function setCoachOpen(open) {
+function setCoachOpen(open, opts = {}) {
+  const { autoCloseMs = 0, compact = false } = opts;
   const panel = document.getElementById("aiCoach");
   const fab = document.getElementById("coachFab");
   if (!panel) return;
+  clearTimeout(coachAutoCloseTimer);
   panel.hidden = !open;
+  panel.classList.toggle("is-compact", !!(open && compact));
   if (fab) fab.classList.toggle("is-open", !!open);
   if (open) {
     coachUnread = 0;
     if (els.coachBadge) els.coachBadge.hidden = true;
-    const toast = document.getElementById("coachToast");
-    if (toast) toast.hidden = true;
+    if (autoCloseMs > 0) {
+      coachAutoCloseTimer = setTimeout(() => {
+        setCoachOpen(false);
+      }, autoCloseMs);
+    }
   }
 }
 
@@ -1863,24 +1870,26 @@ function bumpCoachBadge() {
   els.coachBadge.textContent = String(Math.min(coachUnread, 9));
 }
 
-function showCoachToast(message) {
+function showCoachToast(message, kind = "good") {
   const toast = document.getElementById("coachToast");
   if (!toast) return;
   toast.hidden = false;
-  toast.textContent = String(message || "").slice(0, 160);
+  toast.classList.toggle("is-warn", kind === "bad");
+  toast.innerHTML = `<small>Infogrid Coach</small><span>${escapeHtml(String(message || "").slice(0, 180))}</span>`;
   clearTimeout(showCoachToast._timer);
+  // Stay visible 5–10s then tuck away
   showCoachToast._timer = setTimeout(() => {
     toast.hidden = true;
-  }, 7000);
+  }, 8000);
 }
 
 function celebrate(message, kind = "good") {
   coachFlash = { message, kind };
-  coachFlashUntil = Date.now() + 20000;
+  coachFlashUntil = Date.now() + 10000;
   if (els.jarvisLine) els.jarvisLine.textContent = message;
   bumpCoachBadge();
-  showCoachToast(message);
-  setCoachOpen(true);
+  // Compact toast only — never cover the page with the full chat panel
+  showCoachToast(message, kind);
   renderCoach();
 }
 
@@ -2035,15 +2044,16 @@ function renderCoach() {
   }
 
   const bubbles = [];
-  bubbles.push(`<div class="coach-bubble coach-bubble--bot"><small>Coach</small>Hi — I’m Infogrid Coach. I only post updates (no typing). Here’s your brief.</div>`);
   if (coachFlash && Date.now() < coachFlashUntil) {
     const cls = coachFlash.kind === "bad" ? "coach-bubble--bad" : "coach-bubble--flash";
     bubbles.push(`<div class="coach-bubble coach-bubble--bot ${cls}"><small>Update</small>${escapeHtml(coachFlash.message)}</div>`);
+  } else {
+    bubbles.push(`<div class="coach-bubble coach-bubble--bot"><small>Coach</small>Tap for a quick brief. Updates also pop above this button for a few seconds.</div>`);
   }
-  for (const line of good) {
+  for (const line of good.slice(0, 2)) {
     bubbles.push(`<div class="coach-bubble coach-bubble--bot coach-bubble--good"><small>Good news</small>${escapeHtml(line)}</div>`);
   }
-  for (const line of bad) {
+  for (const line of bad.slice(0, 2)) {
     bubbles.push(`<div class="coach-bubble coach-bubble--bot coach-bubble--bad"><small>Reality check</small>${escapeHtml(line)}</div>`);
   }
   chat.innerHTML = bubbles.join("");
@@ -2359,8 +2369,14 @@ document.getElementById("exportExcel").onclick = () => downloadExcel();
 document.getElementById("coachFab")?.addEventListener("click", () => {
   const panel = document.getElementById("aiCoach");
   const willOpen = !panel || panel.hidden;
-  setCoachOpen(willOpen);
-  if (willOpen) renderCoach();
+  if (willOpen) {
+    const toast = document.getElementById("coachToast");
+    if (toast) toast.hidden = true;
+    setCoachOpen(true, { autoCloseMs: 10000, compact: true });
+    renderCoach();
+  } else {
+    setCoachOpen(false);
+  }
 });
 document.getElementById("coachClose")?.addEventListener("click", () => setCoachOpen(false));
 
