@@ -35,63 +35,65 @@
       <p class="sprint-range" id="sprintRange">Aug 10 – Sep 30, 2026</p>
       <p class="sprint-today-hint">Selected day is below in Today · sprint window starts Aug 10</p>
 
-      <div class="time-strip" aria-label="Time remaining">
-        <div class="time-cell time-cell--month">
-          <span class="time-kicker">Month end</span>
-          <strong class="time-value" id="cdMonth">—</strong>
+      <section class="hero-board" aria-label="Sprint overview">
+        <div class="time-strip" aria-label="Time remaining">
+          <div class="time-metric time-metric--month">
+            <span class="time-metric__value" id="cdMonth">—</span>
+            <span class="time-metric__label">Month end</span>
+          </div>
+          <div class="time-strip__rule" aria-hidden="true"></div>
+          <div class="time-metric time-metric--year">
+            <span class="time-metric__value" id="cdYear">—</span>
+            <span class="time-metric__label">Year end</span>
+          </div>
         </div>
-        <div class="time-divider" aria-hidden="true"></div>
-        <div class="time-cell time-cell--year">
-          <span class="time-kicker">Year end</span>
-          <strong class="time-value" id="cdYear">—</strong>
-        </div>
-      </div>
 
-      <div class="progress-duo" aria-label="Sprint progress">
-        <svg class="ring ring--varsha" viewBox="0 0 120 120" aria-hidden="true">
-          <circle class="ring-track" cx="60" cy="60" r="52" />
-          <circle class="ring-fill" id="ringVarsha" cx="60" cy="60" r="52" />
-        </svg>
-        <svg class="ring ring--sid" viewBox="0 0 120 120" aria-hidden="true">
-          <circle class="ring-track" cx="60" cy="60" r="52" />
-          <circle class="ring-fill" id="ringSid" cx="60" cy="60" r="52" />
-        </svg>
-        <div class="progress-center">
-          <span class="progress-pct" id="combinedPct">0%</span>
-          <span class="progress-label">sprint</span>
+        <div class="progress-duo" aria-label="Sprint progress">
+          <svg class="ring ring--varsha" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="ring-track" cx="60" cy="60" r="52" />
+            <circle class="ring-fill" id="ringVarsha" cx="60" cy="60" r="52" />
+          </svg>
+          <svg class="ring ring--sid" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="ring-track" cx="60" cy="60" r="52" />
+            <circle class="ring-fill" id="ringSid" cx="60" cy="60" r="52" />
+          </svg>
+          <div class="progress-center">
+            <span class="progress-pct" id="combinedPct">0%</span>
+            <span class="progress-label">sprint</span>
+          </div>
         </div>
-      </div>
 
-      <div class="metric-board">
-        <div class="metric-board__row metric-board__row--main" aria-label="Daily status">
-          <div class="metric">
-            <span class="metric-label">Today done by both</span>
-            <span class="metric-value" id="bothDone">Not yet</span>
+        <div class="status-board">
+          <div class="status-board__row status-board__row--main" aria-label="Daily status">
+            <div class="metric">
+              <span class="metric__value" id="bothDone">Not yet</span>
+              <span class="metric__label">Today done by both</span>
+            </div>
+            <div class="metric">
+              <span class="metric__value" id="daysLogged">0</span>
+              <span class="metric__label">Days logged</span>
+            </div>
+            <div class="metric">
+              <span class="metric__value" id="daysLeft">—</span>
+              <span class="metric__label">Days left</span>
+            </div>
           </div>
-          <div class="metric">
-            <span class="metric-label">Days logged</span>
-            <span class="metric-value" id="daysLogged">0</span>
-          </div>
-          <div class="metric">
-            <span class="metric-label">Days left</span>
-            <span class="metric-value" id="daysLeft">—</span>
+          <div class="status-board__row status-board__row--sub" aria-label="Sprint metrics">
+            <div class="metric metric--sub">
+              <span class="metric__value"><span id="totalCalls">0</span>/<span id="callTarget">200</span></span>
+              <span class="metric__label">Calls</span>
+            </div>
+            <div class="metric metric--sub">
+              <span class="metric__value" id="meetingsBooked">0</span>
+              <span class="metric__label">Owner connects</span>
+            </div>
+            <div class="metric metric--sub">
+              <span class="metric__value" id="teamHoursToday">0h 00m</span>
+              <span class="metric__label">Team hours</span>
+            </div>
           </div>
         </div>
-        <div class="metric-board__row metric-board__row--sub" aria-label="Sprint metrics">
-          <div class="metric">
-            <span class="metric-label">Calls</span>
-            <span class="metric-value"><span id="totalCalls">0</span>/<span id="callTarget">200</span></span>
-          </div>
-          <div class="metric">
-            <span class="metric-label">Owner connects</span>
-            <span class="metric-value" id="meetingsBooked">0</span>
-          </div>
-          <div class="metric">
-            <span class="metric-label">Team hours</span>
-            <span class="metric-value" id="teamHoursToday">0h 00m</span>
-          </div>
-        </div>
-      </div>
+      </section>
 
       <div class="pace-bar-wrap">
         <div class="pace-bar-top"><span>200-call pace</span><span id="callPct">0%</span></div>
